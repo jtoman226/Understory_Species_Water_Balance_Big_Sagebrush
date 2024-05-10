@@ -1,0 +1,4244 @@
+---
+title: "Sensor_AET"
+author: "Joseph Toman"
+date: "2023-10-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Library
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(devtools)
+library(dplyr)
+```
+Making dataframes of well data
+```{r}
+#reading in field data
+filepath <- "C:/Users/walnu/Desktop/Moisture_Data"
+filepath2 <- "E:/Soilwat"
+#2022
+#LMG_56A<- read.csv(file.path(filepath,"LMG_56A.csv"))
+#LMG_56B<- read.csv(file.path(filepath,"LMG_56B.csv"))
+#LMG_57A<- read.csv(file.path(filepath,"LMG_57A.csv"))
+#LMG_57B<- read.csv(file.path(filepath,"LMG_57B.csv"))
+LMG_59A<- read.csv(file.path(filepath,"LMG_59A.csv"))
+LMG_59B<- read.csv(file.path(filepath,"LMG_59B.csv"))
+LMG_62A<- read.csv(file.path(filepath,"LMG_62A.csv"))
+LMG_62B<- read.csv(file.path(filepath,"LMG_62B.csv"))
+LMG_67A<- read.csv(file.path(filepath,"LMG_67A.csv"))
+LMG_67B<- read.csv(file.path(filepath,"LMG_67B.csv"))
+Water_Add_22<-read.csv(file.path(filepath,"Water_Dates_2022.csv"))
+#2023
+ #LMG_56A_23<- read.csv(file.path(filepath,"LMG_56A_23.csv"))
+#LMG_56B_23<- read.csv(file.path(filepath,"LMG_56B_23.csv"))
+LMG_59A_23<- read.csv(file.path(filepath,"LMG_59A_23.csv"))
+LMG_59B_23<- read.csv(file.path(filepath,"LMG_59B_23.csv"))
+LMG_62A_23<- read.csv(file.path(filepath,"LMG_62A_23.csv"))
+LMG_62B_23<- read.csv(file.path(filepath,"LMG_62B_23.csv"))
+LMG_67A_23<- read.csv(file.path(filepath,"LMG_67A_23.csv"))
+LMG_67B_23<- read.csv(file.path(filepath,"LMG_67B_23.csv"))
+Big_Piney_2023<- read.csv(file.path(filepath,"Big_Piney_2023.csv"))
+
+```
+Formatting 2022 wells
+```{r}
+
+#59A
+LMG_59A$Timestamps<- as.Date.character(LMG_59A$Timestamps, format =  "%m/%d/%Y")
+LMG_59A<-LMG_59A[LMG_59A$Timestamps >= "2022-01-01" & LMG_59A$Timestamps <= "2022-12-31", ]
+#LMG_59A$`m^3/m^3`<-as.numeric( LMG_59A$Port3,LMG_59A$Port4, LMG_59A$Port5, LMG_59A$Port6 )
+Well_59A<-melt(LMG_59A, id.vars = "Timestamps", measure.vars = c("Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_59A$`m^3/m^3`<-as.numeric(Well_59A$`m^3/m^3`)
+condense_by_day_59A<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_59A, mean)
+condense_by_day_59A$Well<-rep(59)
+#59B
+LMG_59B$Timestamps<- as.Date.character(LMG_59B$Timestamps, format =  "%m/%d/%Y")
+LMG_59B<-LMG_59B[LMG_59B$Timestamps >= "2022-01-01" & LMG_59B$Timestamps <= "2022-12-31", ]
+#LMG_59B$`m^3/m^3`<-as.numeric(LMG_59B$Port1,LMG_59B$Port2, LMG_59B$Port3,LMG_59B$Port4, LMG_59B$Port5, LMG_59B$Port6 )
+Well_59B<-melt(LMG_59B, id.vars = "Timestamps", measure.vars = c("Port1","Port2","Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_59B$`m^3/m^3`<-as.numeric(Well_59B$`m^3/m^3`)
+condense_by_day_59B<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_59B, mean)
+condense_by_day_59B$Well<-rep(59)
+
+#62A
+LMG_62A$Timestamps<- as.Date.character(LMG_62A$Timestamps, format =  "%m/%d/%Y")
+LMG_62A<-LMG_62A[LMG_62A$Timestamps >= "2022-01-01" & LMG_62A$Timestamps <= "2022-12-31", ]
+#LMG_62A$`m^3/m^3`<-as.numeric( LMG_62A$Port3,LMG_62A$Port4, LMG_62A$Port5, LMG_62A$Port6 )
+Well_62A<-melt(LMG_62A, id.vars = "Timestamps", measure.vars = c("Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_62A$`m^3/m^3`<-as.numeric(Well_62A$`m^3/m^3`)
+condense_by_day_62A<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_62A, mean)
+condense_by_day_62A$Well<-rep(62)
+#62B
+LMG_62B$Timestamps<- as.Date.character(LMG_62B$Timestamps, format =  "%m/%d/%Y")
+LMG_62B<-LMG_62B[LMG_62B$Timestamps >= "2022-01-01" & LMG_62B$Timestamps <= "2022-12-31", ]
+#LMG_62B$`m^3/m^3`<-as.numeric(LMG_62B$Port1,LMG_62B$Port2, LMG_62B$Port3,LMG_62B$Port4, LMG_62B$Port5, LMG_62B$Port6 )
+Well_62B<-melt(LMG_62B, id.vars = "Timestamps", measure.vars = c("Port1","Port2","Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_62B$`m^3/m^3`<-as.numeric(Well_62B$`m^3/m^3`)
+condense_by_day_62B<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_62B, mean)
+condense_by_day_62B$Well<-rep(62)
+
+#67A
+LMG_67A$Timestamps<- as.Date.character(LMG_67A$Timestamps, format =  "%m/%d/%Y")
+LMG_67A<-LMG_67A[LMG_67A$Timestamps >= "2022-01-01" & LMG_67A$Timestamps <= "2022-12-31", ]
+#LMG_67A$`m^3/m^3`<-as.numeric( LMG_67A$Port3,LMG_67A$Port4, LMG_67A$Port5, LMG_67A$Port6 )
+Well_67A<-melt(LMG_67A, id.vars = "Timestamps", measure.vars = c("Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_67A$`m^3/m^3`<-as.numeric(Well_67A$`m^3/m^3`)
+condense_by_day_67A<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_67A, mean)
+condense_by_day_67A$Well<-rep(67)
+#67B
+LMG_67B$Timestamps<- as.Date.character(LMG_67B$Timestamps, format =  "%m/%d/%Y")
+LMG_67B<-LMG_67B[LMG_67B$Timestamps >= "2022-01-01" & LMG_67B$Timestamps <= "2022-12-31", ]
+#LMG_67B$`m^3/m^3`<-as.numeric(LMG_67B$Port1,LMG_67B$Port2, LMG_67B$Port3,LMG_67B$Port4, LMG_67B$Port5, LMG_67B$Port6 )
+Well_67B<-melt(LMG_67B, id.vars = "Timestamps", measure.vars = c("Port1","Port2","Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_67B$`m^3/m^3`<-as.numeric(Well_67B$`m^3/m^3`)
+condense_by_day_67B<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_67B, mean)
+condense_by_day_67B$Well<-rep(67)
+
+```
+Formatting 2023 wells
+```{r}
+#59A
+LMG_59A_23$Timestamps<- as.Date.character(LMG_59A_23$Timestamps, format =  "%m/%d/%Y")
+LMG_59A_23<-LMG_59A_23[LMG_59A_23$Timestamps >= "2023-01-01" & LMG_59A_23$Timestamps <= "2023-12-31", ]
+#LMG_59A_23$`m^3/m^3`<-as.numeric( LMG_59A_23$Port3,LMG_59A_23$Port4, LMG_59A_23$Port5, LMG_59A_23$Port6 )
+
+Well_59A_23<-melt(LMG_59A_23, id.vars = "Timestamps", measure.vars = c("Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_59A_23$`m^3/m^3`<-as.numeric(Well_59A_23$`m^3/m^3`)
+condense_by_day_59A_23<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_59A_23, mean)
+condense_by_day_59A_23$Well<-rep(59)
+#59B
+LMG_59B_23$Timestamps<- as.Date.character(LMG_59B_23$Timestamps, format =  "%m/%d/%Y")
+LMG_59B_23<-LMG_59B_23[LMG_59B_23$Timestamps >= "2023-01-01" & LMG_59B_23$Timestamps <= "2023-12-31", ]
+#LMG_59B_23$`m^3/m^3`<-as.numeric(LMG_59B_23$Port1,LMG_59B_23$Port2, LMG_59B_23$Port3,LMG_59B_23$Port4, LMG_59B_23$Port5, LMG_59B_23$Port6 )
+
+Well_59B_23<-melt(LMG_59B_23, id.vars = "Timestamps", measure.vars = c("Port1","Port2","Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_59B_23$`m^3/m^3`<-as.numeric(Well_59B_23$`m^3/m^3`)
+condense_by_day_59B_23<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_59B_23, mean)
+condense_by_day_59B_23$Well<-rep(59)
+
+#62A
+LMG_62A_23$Timestamps<- as.Date.character(LMG_62A_23$Timestamps, format =  "%m/%d/%Y")
+LMG_62A_23<-LMG_62A_23[LMG_62A_23$Timestamps >= "2023-01-01" & LMG_62A_23$Timestamps <= "2023-12-31", ]
+#LMG_62A_23$`m^3/m^3`<-as.numeric( LMG_62A_23$Port3,LMG_62A_23$Port4, LMG_62A_23$Port5, LMG_62A_23$Port6 )
+Well_62A_23<-melt(LMG_62A_23, id.vars = "Timestamps", measure.vars = c("Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_62A_23$`m^3/m^3`<-as.numeric(Well_62A_23$`m^3/m^3`)
+condense_by_day_62A_23<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_62A_23, mean)
+condense_by_day_62A_23$Well<-rep(62)
+#62B
+LMG_62B_23$Timestamps<- as.Date.character(LMG_62B_23$Timestamps, format =  "%m/%d/%Y")
+LMG_62B_23<-LMG_62B_23[LMG_62B_23$Timestamps >= "2023-01-01" & LMG_62B_23$Timestamps <= "2023-12-31", ]
+#LMG_62B_23$`m^3/m^3`<-as.numeric(LMG_62B_23$Port1,LMG_62B_23$Port2, LMG_62B_23$Port3,LMG_62B_23$Port4, LMG_62B_23$Port5, LMG_62B_23$Port6 )
+Well_62B_23<-melt(LMG_62B_23, id.vars = "Timestamps", measure.vars = c("Port1","Port2","Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_62B_23$`m^3/m^3`<-as.numeric(Well_62B_23$`m^3/m^3`)
+condense_by_day_62B_23<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_62B_23, mean)
+condense_by_day_62B_23$Well<-rep(62)
+
+#67A
+LMG_67A_23$Timestamps<- as.Date.character(LMG_67A_23$Timestamps, format =  "%m/%d/%Y")
+LMG_67A_23<-LMG_67A_23[LMG_67A_23$Timestamps >= "2023-01-01" & LMG_67A_23$Timestamps <= "2023-12-31", ]
+#LMG_67A_23$`m^3/m^3`<-as.numeric( LMG_67A_23$Port3,LMG_67A_23$Port4, LMG_67A_23$Port5, LMG_67A_23$Port6 )
+Well_67A_23<-melt(LMG_67A_23, id.vars = "Timestamps", measure.vars = c("Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_67A_23$`m^3/m^3`<-as.numeric(Well_67A_23$`m^3/m^3`)
+condense_by_day_67A_23<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_67A_23, mean)
+condense_by_day_67A_23$Well<-rep(67)
+#67B
+LMG_67B_23$Timestamps<- as.Date.character(LMG_67B_23$Timestamps, format =  "%m/%d/%Y")
+LMG_67B_23<-LMG_67B_23[LMG_67B_23$Timestamps >= "2023-01-01" & LMG_67B_23$Timestamps <= "2023-12-31", ]
+#LMG_67B_23$`m^3/m^3`<-as.numeric(LMG_67B_23$Port1,LMG_67B_23$Port2, LMG_67B_23$Port3,LMG_67B_23$Port4, LMG_67B_23$Port5, LMG_67B_23$Port6 )
+Well_67B_23<-melt(LMG_67B_23, id.vars = "Timestamps", measure.vars = c("Port1","Port2","Port3","Port4","Port5","Port6"),variable.name = "Port", value.name="m^3/m^3")
+Well_67B_23$`m^3/m^3`<-as.numeric(Well_67B_23$`m^3/m^3`)
+condense_by_day_67B_23<-aggregate(`m^3/m^3` ~ Timestamps + Port, Well_67B_23, mean)
+condense_by_day_67B_23$Well<-rep(67)
+
+```
+Precip info from sensors 22
+```{r}
+#####Precip input 59
+LMG_59A$DOY<-yday(LMG_59A$Timestamps)
+
+LMG_59AT <- aggregate(X.C.Air.Temperature ~ Timestamps, data = LMG_59A, FUN = function(x) c(Tmax_C = max(x), Tmin_C = min(x)))
+LMG_59ATemp<-as.data.frame(LMG_59AT$X.C.Air.Temperature)
+LMG_59ADOY<-as.data.frame(LMG_59AT$Timestamps)
+LMG_59AT<-cbind(LMG_59ATemp,LMG_59ADOY)
+LMG_59AT$Timestamps<-LMG_59AT$`LMG_59AT$Timestamps`
+LMG_59AT$DOY<-yday(LMG_59AT$Timestamps)
+
+LMG_59AP <- aggregate(mm.Precipitation ~ DOY, data = LMG_59A, FUN = function(x) c(PPT_cm = sum(x/10)))
+LMG_59AP$PPT_cm<-LMG_59AP$mm.Precipitation
+Climate_data_2022<-merge(LMG_59AT, LMG_59AP, by ="DOY")
+
+Climate_data_2022<-Climate_data_2022[, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")]
+#write.table(Climate_data_2022, file = "C:/Users/walnu/Desktop/output_file_59.csv", sep = "\t", row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+LMG_59AC<-melt(LMG_59A, id.vars = "Timestamps", measure.vars = c("mm.Precipitation"),
+     variable.name = "Climate", value.name="Value")
+LMG_59AC$Well<-rep(59)
+LMG_59AC$Temp<-LMG_59A$X.C.Air.Temperature 
+Well_59_precip<-aggregate(Value ~ Timestamps, data = LMG_59AC, sum)
+Well_59_temp<-aggregate(Temp ~ Timestamps, data = LMG_59AC, mean)
+Well_59_climate<-cbind(Well_59_temp,Well_59_precip)
+Well_59_climate$date<-Well_59_climate$Timestamps
+
+#####Precip input 62
+
+#LMG_62A$Timestamps<- as.Date.character(LMG_62A$Timestamps, format =  "%m/%d/%Y")
+#LMG_62A<-LMG_62A[LMG_62A$Timestamps >= "2022-01-01" & LMG_62A$Timestamps <= "2022-12-31", ]
+LMG_62A$DOY<-yday(LMG_62A$Timestamps)
+
+LMG_62AT <- aggregate(X.C.Air.Temperature ~ Timestamps, data = LMG_62A, FUN = function(x) c(Tmax_C = max(x), Tmin_C = min(x)))
+LMG_62ATemp<-as.data.frame(LMG_62AT$X.C.Air.Temperature)
+LMG_62ADOY<-as.data.frame(LMG_62AT$Timestamps)
+LMG_62AT<-cbind(LMG_62ATemp,LMG_62ADOY)
+LMG_62AT$Timestamps<-LMG_62AT$`LMG_62AT$Timestamps`
+LMG_62AT$DOY<-yday(LMG_62AT$Timestamps)
+
+LMG_62AP <- aggregate(mm.Precipitation ~ DOY, data = LMG_62A, FUN = function(x) c(PPT_cm = sum(x/10)))
+LMG_62AP$PPT_cm<-LMG_62AP$mm.Precipitation
+
+Climate_data_2022_62<-merge(LMG_62AT, LMG_62AP, by ="DOY")
+Climate_data_2022_62<-Climate_data_2022_62[, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")]
+
+#write.csv(Climate_data_2022_62, file = "C:/Users/walnu/Desktop/output_file_62.csv",  row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+LMG_62AC<-melt(LMG_62A, id.vars = "Timestamps", measure.vars = c("mm.Precipitation"),
+     variable.name = "Climate", value.name="Value")
+LMG_62AC$Well<-rep(62)
+LMG_62AC$Temp<-LMG_62A$X.C.Air.Temperature 
+Well_62_precip<-aggregate(Value ~ Timestamps, data = LMG_62AC, sum)
+Well_62_temp<-aggregate(Temp ~ Timestamps, data = LMG_62AC, mean)
+Well_62_climate<-cbind(Well_62_temp,Well_62_precip)
+Well_62_climate$date<-Well_62_climate$Timestamps
+
+#####Precip input 67
+
+#LMG_67A$Timestamps<- as.Date.character(LMG_67A$Timestamps, format =  "%m/%d/%Y")
+#LMG_67A<-LMG_67A[LMG_67A$Timestamps >= "2022-01-01" & LMG_67A$Timestamps <= "2022-12-31", ]
+LMG_67A$DOY<-yday(LMG_67A$Timestamps)
+
+LMG_67AT <- aggregate(X.C.Air.Temperature ~ Timestamps, data = LMG_67A, FUN = function(x) c(Tmax_C = max(x), Tmin_C = min(x)))
+LMG_67ATemp<-as.data.frame(LMG_67AT$X.C.Air.Temperature)
+LMG_67ADOY<-as.data.frame(LMG_67AT$Timestamps)
+LMG_67AT<-cbind(LMG_67ATemp,LMG_67ADOY)
+LMG_67AT$Timestamps<-LMG_67AT$`LMG_67AT$Timestamps`
+LMG_67AT$DOY<-yday(LMG_67AT$Timestamps)
+
+LMG_67AP <- aggregate(mm.Precipitation ~ DOY, data = LMG_67A, FUN = function(x) c(PPT_cm = sum(x/10)))
+LMG_67AP$PPT_cm<-LMG_67AP$mm.Precipitation
+
+Climate_data_2022_67<-merge(LMG_67AT, LMG_67AP, by ="DOY")
+Climate_data_2022_67<-Climate_data_2022_67[, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")]
+
+#write.csv(Climate_data_2022_67, file = "C:/Users/walnu/Desktop/output_file_62.csv",  row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+LMG_67AC<-melt(LMG_67A, id.vars = "Timestamps", measure.vars = c("mm.Precipitation"),
+     variable.name = "Climate", value.name="Value")
+LMG_67AC$Well<-rep(67)
+LMG_67AC$Temp<-LMG_67A$X.C.Air.Temperature 
+Well_67_precip<-aggregate(Value ~ Timestamps, data = LMG_67AC, sum)
+Well_67_temp<-aggregate(Temp ~ Timestamps, data = LMG_67AC, mean)
+Well_67_climate<-cbind(Well_67_temp,Well_67_precip)
+Well_67_climate$date<-Well_67_climate$Timestamps
+
+
+Date<-subset(Well_59_climate, Timestamps> "2022-05-27"& Timestamps < "2022-08-13")
+
+update_mm_in_place <- function(df_main, df) {
+  for (i in 1:nrow(df)) {
+    # For each row in df, check if there's a matching Site and Date in df_main
+    matching_indices <- which(df_main$DOY == df$DOY[i])
+    if (length(matching_indices) > 0) {
+      # If there's a match, add 10 to the mm value for the matching rows
+      df$PPT_cm[i] <- df$PPT_cm[i] + 1
+    }
+  }
+  return(df)
+}
+
+
+update_mm_in_place2 <- function(df_main, df) {
+  for (i in 1:nrow(df)) {
+    # For each row in df, check if there's a matching Site and Date in df_main
+    matching_indices <- which(df_main$DOY == df$DOY[i])
+    if (length(matching_indices) > 0) {
+      # If there's a match, add 10 to the mm value for the matching rows
+      df$Value[i] <- df$Value[i] + 10
+    }
+  }
+  return(df)
+}
+
+WA59_22 <- data.frame(Date=as.Date(c("2022-05-14", "2022-05-27", "2022-06-02","2022-06-09")))
+WA59_22$DOY<-yday(WA59_22$Date)
+WA62_22<-data.frame(Date=as.Date(c("2022-05-16", "2022-05-26", "2022-06-04","2022-06-08")))
+WA62_22$DOY<-yday(WA62_22$Date)
+WA67_22<-data.frame(Date=as.Date(c("2022-05-15", "2022-05-25", "2022-06-01","2022-06-07")))
+WA67_22$DOY<-yday(WA67_22$Date)
+
+Climate_data_2022_WA <- update_mm_in_place(WA59_22, Climate_data_2022)
+Climate_data_2022_62_WA <- update_mm_in_place(WA62_22, Climate_data_2022_62)
+Climate_data_2022_67_WA <- update_mm_in_place(WA67_22, Climate_data_2022_67)
+
+Well_59_climate$DOY<- yday(Well_59_climate$date)
+Well_62_climate$DOY<- yday(Well_62_climate$date)
+Well_67_climate$DOY<- yday(Well_67_climate$date)
+# df1_updated to df5_updated now have the 'mm' column updated where 'Site' and 'Date' match with df_main
+Climate59_WA <- update_mm_in_place2(WA59_22, Well_59_climate)
+Climate62_WA <- update_mm_in_place2(WA62_22, Well_62_climate)
+Climate67_WA <- update_mm_in_place2(WA67_22, Well_67_climate)
+
+
+```
+Precip info from sensors 23
+```{r}
+#####Precip input 59
+
+Big_Piney_2023<- read.csv(file.path(filepath,"Big_Piney_2023.csv"))
+Big_Piney_2023$Timestamps<- as.Date.character(Big_Piney_2023$Date, format =  "%m/%d/%Y")
+Big_Piney_2023$DOY<-yday(Big_Piney_2023$Timestamps)
+
+Well_59_climate_23<-Big_Piney_2023[,  c("DOY", "TMax..C.", "TMin..C.", "Precip_mm")]
+Well_59_climate_23$Precip_mm<-Well_59_climate_23$Precip_mm/10
+colnames(Well_59_climate_23)<-c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+Supplement_23_under<-subset(Climate_data_2022, DOY < 23)
+Supplement_23_over<-subset(Climate_data_2022, DOY > 295)
+Supplement_23_overs<-subset(Climate_data_2022, DOY > 273)
+Well_59_climate_23_full<-rbind(Supplement_23_under,Well_59_climate_23,Supplement_23_over)
+
+#####Precip input 62
+
+#LMG_62A$Timestamps<- as.Date.character(LMG_62A$Timestamps, format =  "%m/%d/%Y")
+#LMG_62A<-LMG_62A[LMG_62A$Timestamps >= "2022-01-01" & LMG_62A$Timestamps <= "2022-12-31", ]
+LMG_62A_23$DOY<-yday(LMG_62A_23$Timestamps)
+
+LMG_62AT_23 <- aggregate(X.C.Air.Temperature ~ Timestamps, data = LMG_62A_23, FUN = function(x) c(Tmax_C = max(x), Tmin_C = min(x)))
+LMG_62ATemp_23<-as.data.frame(LMG_62AT_23$X.C.Air.Temperature)
+LMG_62ADOY_23<-as.data.frame(LMG_62AT_23$Timestamps)
+LMG_62AT_23<-cbind(LMG_62ATemp_23,LMG_62ADOY_23)
+LMG_62AT_23$Timestamps<-LMG_62AT_23$`LMG_62AT_23$Timestamps`
+LMG_62AT_23$DOY<-yday(LMG_62AT_23$Timestamps)
+
+LMG_62AP_23 <- aggregate(mm.Precipitation ~ DOY, data = LMG_62A_23, FUN = function(x) c(PPT_cm = sum(x/10)))
+LMG_62AP_23$PPT_cm<-LMG_62AP_23$mm.Precipitation
+
+Climate_data_2023_62<-merge(LMG_62AT_23, LMG_62AP_23, by ="DOY")
+Climate_data_2023_62<-Climate_data_2023_62[, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")]
+Supplement_23_over<-subset(Climate_data_2022, DOY > 219)
+Well_62_climate_23_full<-rbind(Climate_data_2023_62,Supplement_23_overs)
+
+#write.csv(Climate_data_2023_62, file = "C:/Users/walnu/Desktop/output_file_62_23.csv",  row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+LMG_62AC_23<-melt(LMG_62A_23, id.vars = "Timestamps", measure.vars = c("mm.Precipitation"),
+     variable.name = "Climate", value.name="Value")
+LMG_62AC_23$Well<-rep(62)
+LMG_62AC_23$Temp<-LMG_62A_23$X.C.Air.Temperature 
+Well_62_precip_23<-aggregate(Value ~ Timestamps, data = LMG_62AC_23, sum)
+Well_62_temp_23<-aggregate(Temp ~ Timestamps, data = LMG_62AC_23, mean)
+Well_62_climate_23<-cbind(Well_62_temp_23,Well_62_precip_23)
+Well_62_climate_23$date<-Well_62_climate_23$Timestamps
+
+#####Precip input 67
+
+#LMG_67A$Timestamps<- as.Date.character(LMG_67A$Timestamps, format =  "%m/%d/%Y")
+#LMG_67A<-LMG_67A[LMG_67A$Timestamps >= "2022-01-01" & LMG_67A$Timestamps <= "2022-12-31", ]
+
+LMG_67A_23$DOY<-yday(LMG_67A_23$Timestamps)
+
+LMG_67AT_23 <- aggregate(X.C.Air.Temperature ~ Timestamps, data = LMG_67A_23, FUN = function(x) c(Tmax_C = max(x), Tmin_C = min(x)))
+LMG_67ATemp_23<-as.data.frame(LMG_67AT_23$X.C.Air.Temperature)
+LMG_67ADOY_23<-as.data.frame(LMG_67AT_23$Timestamps)
+LMG_67AT_23<-cbind(LMG_67ATemp_23,LMG_67ADOY_23)
+LMG_67AT_23$Timestamps<-LMG_67AT_23$`LMG_67AT_23$Timestamps`
+LMG_67AT_23$DOY<-yday(LMG_67AT_23$Timestamps)
+
+LMG_67AP_23 <- aggregate(mm.Precipitation ~ DOY, data = LMG_67A_23, FUN = function(x) c(PPT_cm = sum(x/10)))
+LMG_67AP_23$PPT_cm<-LMG_67AP_23$mm.Precipitation
+
+Climate_data_2023_67<-merge(LMG_67AT_23, LMG_67AP_23, by ="DOY")
+Climate_data_2023_67<-Climate_data_2023_67[, c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")]
+Supplement_23_over<-subset(Climate_data_2022, DOY > 294)
+Well_67_climate_23_full<-rbind(Climate_data_2023_67,Supplement_23_overs)
+
+#write.csv(Climate_data_2023_67, file = "C:/Users/walnu/Desktop/output_file_67_23.csv",  row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+LMG_67AC_23<-melt(LMG_67A_23, id.vars = "Timestamps", measure.vars = c("mm.Precipitation"),
+     variable.name = "Climate", value.name="Value")
+LMG_67AC_23$Well<-rep(67)
+LMG_67AC_23$Temp<-LMG_67A_23$X.C.Air.Temperature 
+Well_67_precip_23<-aggregate(Value ~ Timestamps, data = LMG_67AC_23, sum)
+Well_67_temp_23<-aggregate(Temp ~ Timestamps, data = LMG_67AC_23, mean)
+Well_67_climate_23<-cbind(Well_67_temp_23,Well_67_precip_23)
+Well_67_climate_23$date<-Well_67_climate_23$Timestamps
+
+WA59_23 <- data.frame(Date=as.Date(c("2023-05-31", "2023-06-09", "2023-06-15", "2023-06-22")))
+WA59_23$DOY<-yday(WA59_23$Date)
+WA62_23<-data.frame(Date=as.Date(c("2023-06-01", "2023-06-05", "2023-06-13","2023-06-23")))
+WA62_23$DOY<-yday(WA62_23$Date)
+WA67_23<-data.frame(Date=as.Date(c("2023-06-03", "2023-06-10", "2023-06-16","2023-06-25")))
+WA67_23$DOY<-yday(WA67_23$Date)
+# Update each df
+
+
+Climate_data_2023_WA <- update_mm_in_place(WA59_23, Well_59_climate_23_full)
+Climate_data_2023_62_WA <- update_mm_in_place(WA62_23, Well_62_climate_23_full)
+Climate_data_2023_67_WA <- update_mm_in_place(WA67_23, Well_67_climate_23_full)
+
+
+
+Well_62_climate_23$DOY<- yday(Well_62_climate_23$date)
+Well_67_climate_23$DOY<- yday(Well_67_climate_23$date)
+# df1_updated to df5_updated now have the 'mm' column updated where 'Site' and 'Date' match with df_main
+Climate59_WA <- update_mm_in_place2(WA59_23, Big_Piney_2023)
+Climate62_WA <- update_mm_in_place2(WA62_23, Well_62_climate_23)
+Climate67_WA <- update_mm_in_place2(WA67_23, Well_67_climate_23)
+
+
+```
+Sensor Calculation 2022
+```{r}
+Well_59_climate<-Well_59_climate[,-1]
+Well_62_climate<-Well_62_climate[,-1]
+Well_67_climate<-Well_67_climate[,-1]
+
+calculate_water_balance <- function(data, interval_days, start_date) {
+  data <- data %>%
+    dplyr::group_by(Timestamps) %>%
+    dplyr::summarize(`m^3/m^3` = sum(`m^3/m^3`), Value = mean(Value)) %>%
+    ungroup()
+  data$DOY <- yday(data$Timestamps)
+
+  interval_col_name <- paste("Interval_", interval_days, "Day", sep = "")
+
+  data_interval <- data %>%
+    dplyr::mutate(!!interval_col_name := ceiling((DOY - yday(start_date)) / interval_days))
+
+  data_interval <- data_interval %>%
+    dplyr::group_by(!!sym(interval_col_name)) %>%
+    dplyr::summarize(
+      First_m3_per_m3 = first(`m^3/m^3`),
+      First_Date = first(Timestamps),
+      Sum_Value = sum(as.numeric(Value))
+    ) %>%
+    ungroup()
+
+  data_interval <- data_interval %>%
+    dplyr::mutate(
+      Water_Balance = First_m3_per_m3 - (lag(First_m3_per_m3) + lag(Sum_Value))
+    )
+
+  return(data_interval)
+}
+
+
+# Example usage for Control_59B_NU_weather_NW with different intervals: if its:
+#No water additions and with understory: ex 59A: "Port3", "Port4"; 
+#No water addition and without understory:ex 59B: "Port1", "Port2"; 
+#Water additions and with understory: ex 59A: "Port5", "Port6"; 
+#Water addition and without understory:ex 59B: "Port4", "Port5"
+start_date<-"2022-01-01"
+#59B 
+#No water addition
+condense_by_day_59B_NW <- condense_by_day_59B %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port1", "Port2"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59B_NU_NW<-condense_by_day_59B_NW[condense_by_day_59B_NW$Port %in% c("Port1", "Port2"), ]
+Control_59B_NU_weather_NW <-merge(Control_59B_NU_NW, Well_59_climate, by= c("Timestamps"), all.y=TRUE)
+
+#Water addition
+condense_by_day_59B_W <- condense_by_day_59B %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port4", "Port5"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59B_NU_W<-condense_by_day_59B_W[condense_by_day_59B_W$Port %in% c("Port4", "Port5"), ]
+Control_59B_NU_weather_W <-merge(Control_59B_NU_W, Well_59_climate, by= c("Timestamps"))
+#adding in water additions
+Control_59B_NU_weather_W <- Control_59B_NU_weather_W %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2022-05-14", "2022-05-27", "2022-06-02","2022-06-09")), Value + 10, Value))
+
+#function
+Control_59B_NU_weather_NW_5 <- calculate_water_balance(Control_59B_NU_weather_NW , 5,start_date)
+Control_59B_NU_weather_NW_7 <- calculate_water_balance(Control_59B_NU_weather_NW , 7,start_date)
+Control_59B_NU_weather_NW_10 <- calculate_water_balance(Control_59B_NU_weather_NW , 10,start_date)
+
+Control_59B_NU_weather_W_5 <- calculate_water_balance(Control_59B_NU_weather_W , 5,start_date)
+Control_59B_NU_weather_W_7 <- calculate_water_balance(Control_59B_NU_weather_W , 7,start_date)
+Control_59B_NU_weather_W_10 <- calculate_water_balance(Control_59B_NU_weather_W , 10,start_date)
+
+#59A 
+#No water additions
+condense_by_day_59A_NW <- condense_by_day_59A %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port3", "Port4"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59A_U_NW<-condense_by_day_59A_NW[condense_by_day_59A_NW$Port %in% c("Port3", "Port4"), ]
+Control_59A_U_weather_NW<-merge(Control_59A_U_NW, Well_59_climate, by= c("Timestamps"))
+#Water additions
+condense_by_day_59A_W <- condense_by_day_59A %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port5", "Port6"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59A_U_W<-condense_by_day_59A_W[condense_by_day_59A_W$Port %in% c("Port5", "Port6"), ]
+Control_59A_U_weather_W<-merge(Control_59A_U_W, Well_59_climate, by= c("Timestamps"))
+#adding in water additions
+Control_59A_U_weather_W <- Control_59A_U_weather_W %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2022-05-14", "2022-05-27", "2022-06-02","2022-06-09")), Value + 10, Value))
+
+#function
+Control_59A_U_weather_NW_5 <- calculate_water_balance(Control_59A_U_weather_NW, 5,start_date)
+Control_59A_U_weather_NW_7 <- calculate_water_balance(Control_59A_U_weather_NW, 7,start_date)
+Control_59A_U_weather_NW_10 <- calculate_water_balance(Control_59A_U_weather_NW, 10,start_date)
+#function
+Control_59A_U_weather_W_5 <- calculate_water_balance(Control_59A_U_weather_W, 5,start_date)
+Control_59A_U_weather_W_7 <- calculate_water_balance(Control_59A_U_weather_W, 7,start_date)
+Control_59A_U_weather_W_10 <- calculate_water_balance(Control_59A_U_weather_W, 10,start_date)
+
+#67B 
+#No water addition
+condense_by_day_67B_NW <- condense_by_day_67B %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port1", "Port2"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67B_NU_NW<-condense_by_day_67B_NW[condense_by_day_67B_NW$Port %in% c("Port1", "Port2"), ]
+Control_67B_NU_weather_NW <-merge(Control_67B_NU_NW, Well_67_climate, by= c("Timestamps"), all.y = TRUE)
+
+#Water addition
+condense_by_day_67B_W <- condense_by_day_67B %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port4", "Port5"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67B_NU_W<-condense_by_day_67B_W[condense_by_day_67B_W$Port %in% c("Port4", "Port5"), ]
+Control_67B_NU_weather_W <-merge(Control_67B_NU_W, Well_67_climate, by= c("Timestamps"), all.y = TRUE)
+#adding in water additions
+Control_67B_NU_weather_W <- Control_67B_NU_weather_W %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2022-05-15", "2022-05-25", "2022-06-01","2022-06-07")), Value + 10, Value))
+
+#function
+Control_67B_NU_weather_NW_5 <- calculate_water_balance(Control_67B_NU_weather_NW , 5,start_date)
+Control_67B_NU_weather_NW_7 <- calculate_water_balance(Control_67B_NU_weather_NW , 7,start_date)
+Control_67B_NU_weather_NW_10 <- calculate_water_balance(Control_67B_NU_weather_NW , 10,start_date)
+
+Control_67B_NU_weather_W_5 <- calculate_water_balance(Control_67B_NU_weather_W , 5,start_date)
+Control_67B_NU_weather_W_7 <- calculate_water_balance(Control_67B_NU_weather_W , 7,start_date)
+Control_67B_NU_weather_W_10 <- calculate_water_balance(Control_67B_NU_weather_W , 10,start_date)
+
+#67A 
+#No water additions
+condense_by_day_67A_NW <- condense_by_day_67A %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port3", "Port4"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67A_U_NW<-condense_by_day_67A_NW[condense_by_day_67A_NW$Port %in% c("Port3", "Port4"), ]
+Control_67A_U_weather_NW<-merge(Control_67A_U_NW, Well_67_climate, by= c("Timestamps"))
+#Water additions
+condense_by_day_67A_W <- condense_by_day_67A %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port5", "Port6"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67A_U_W<-condense_by_day_67A_W[condense_by_day_67A_W$Port %in% c("Port5", "Port6"), ]
+Control_67A_U_weather_W<-merge(Control_67A_U_W, Well_67_climate, by= c("Timestamps"))
+#adding in water additions
+Control_67A_U_weather_W <- Control_67A_U_weather_W %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2022-05-15", "2022-05-25", "2022-06-01","2022-06-07")), Value + 10, Value))
+
+#function
+Control_67A_U_weather_NW_5 <- calculate_water_balance(Control_67A_U_weather_NW, 5,start_date)
+Control_67A_U_weather_NW_7 <- calculate_water_balance(Control_67A_U_weather_NW, 7,start_date)
+Control_67A_U_weather_NW_10 <- calculate_water_balance(Control_67A_U_weather_NW, 10,start_date)
+#function
+Control_67A_U_weather_W_5 <- calculate_water_balance(Control_67A_U_weather_W, 5,start_date)
+Control_67A_U_weather_W_7 <- calculate_water_balance(Control_67A_U_weather_W, 7,start_date)
+Control_67A_U_weather_W_10 <- calculate_water_balance(Control_67A_U_weather_W, 10,start_date)
+
+
+#62B 
+#No water addition
+condense_by_day_62B_NW <- condense_by_day_62B %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port1", "Port2"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62B_NU_NW<-condense_by_day_62B_NW[condense_by_day_62B_NW$Port %in% c("Port1", "Port2"), ]
+Control_62B_NU_weather_NW <-merge(Control_62B_NU_NW, Well_62_climate, by= c("Timestamps"))
+#Water addition
+condense_by_day_62B_W <- condense_by_day_62B %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port4", "Port5"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62B_NU_W<-condense_by_day_62B_W[condense_by_day_62B_W$Port %in% c("Port4", "Port5"), ]
+Control_62B_NU_weather_W <-merge(Control_62B_NU_W, Well_62_climate, by= c("Timestamps"))
+#adding in water additions
+Control_62B_NU_weather_W <- Control_62B_NU_weather_W %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2022-05-16", "2022-05-26", "2022-06-04","2022-06-08")), Value + 10, Value))
+
+#function
+Control_62B_NU_weather_NW_5 <- calculate_water_balance(Control_62B_NU_weather_NW , 5,start_date)
+Control_62B_NU_weather_NW_7 <- calculate_water_balance(Control_62B_NU_weather_NW , 7,start_date)
+Control_62B_NU_weather_NW_10 <- calculate_water_balance(Control_62B_NU_weather_NW , 10,start_date)
+
+Control_62B_NU_weather_W_5 <- calculate_water_balance(Control_62B_NU_weather_W , 5,start_date)
+Control_62B_NU_weather_W_7 <- calculate_water_balance(Control_62B_NU_weather_W , 7,start_date)
+Control_62B_NU_weather_W_10 <- calculate_water_balance(Control_62B_NU_weather_W , 10,start_date)
+
+#62A 
+#No water additions
+condense_by_day_62A_NW <- condense_by_day_62A %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port3", "Port4"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62A_U_NW<-condense_by_day_62A_NW[condense_by_day_62A_NW$Port %in% c("Port3", "Port4"), ]
+Control_62A_U_weather_NW<-merge(Control_62A_U_NW, Well_62_climate, by= c("Timestamps"))
+#Water additions
+condense_by_day_62A_W <- condense_by_day_62A %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port5", "Port6"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62A_U_W<-condense_by_day_62A_W[condense_by_day_62A_W$Port %in% c("Port5", "Port6"), ]
+Control_62A_U_weather_W<-merge(Control_62A_U_W, Well_62_climate, by= c("Timestamps"))
+#adding in water additions
+Control_62A_U_weather_W <- Control_62A_U_weather_W %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2022-05-16", "2022-05-26", "2022-06-04","2022-06-08")), Value + 10, Value))
+
+#function
+Control_62A_U_weather_NW_5 <- calculate_water_balance(Control_62A_U_weather_NW, 5,start_date)
+Control_62A_U_weather_NW_7 <- calculate_water_balance(Control_62A_U_weather_NW, 7,start_date)
+Control_62A_U_weather_NW_10 <- calculate_water_balance(Control_62A_U_weather_NW, 10,start_date)
+#function
+Control_62A_U_weather_W_5 <- calculate_water_balance(Control_62A_U_weather_W, 5,start_date)
+Control_62A_U_weather_W_7 <- calculate_water_balance(Control_62A_U_weather_W, 7,start_date)
+Control_62A_U_weather_W_10 <- calculate_water_balance(Control_62A_U_weather_W, 10,start_date)
+
+# List of dataframes
+Interval_5_list <- list(
+  Control_59A_U_weather_NW_5, 
+  Control_59A_U_weather_W_5, 
+  Control_59B_NU_weather_NW_5, 
+  Control_62A_U_weather_NW_5, 
+  Control_62A_U_weather_W_5, 
+  Control_59B_NU_weather_W_5, 
+  Control_62B_NU_weather_NW_5, 
+  Control_62B_NU_weather_W_5,  
+  Control_67A_U_weather_NW_5, 
+  Control_67A_U_weather_W_5, 
+  Control_67B_NU_weather_W_5,  
+  Control_67B_NU_weather_NW_5 
+)
+Interval_7_list <- list(
+  Control_62A_U_weather_NW_7, 
+  Control_59A_U_weather_NW_7, 
+  Control_59B_NU_weather_NW_7, 
+  Control_59B_NU_weather_W_7, 
+  Control_59A_U_weather_W_7, 
+  Control_62A_U_weather_W_7,
+  Control_62B_NU_weather_NW_7,
+  Control_62B_NU_weather_W_7, 
+  Control_67A_U_weather_NW_7, 
+  Control_67A_U_weather_W_7,
+  Control_67B_NU_weather_NW_7, 
+  Control_67B_NU_weather_W_7
+)
+Interval_10_list <- list(
+  Control_59A_U_weather_NW_10, 
+  Control_59A_U_weather_W_10, 
+  Control_59B_NU_weather_NW_10,  
+  Control_59B_NU_weather_W_10, 
+  Control_62A_U_weather_NW_10, 
+  Control_62A_U_weather_W_10, 
+  Control_62B_NU_weather_NW_10, 
+  Control_62B_NU_weather_W_10, 
+  Control_67A_U_weather_NW_10,
+  Control_67A_U_weather_W_10, 
+  Control_67B_NU_weather_NW_10, 
+  Control_67B_NU_weather_W_10 
+  )
+
+# Define the folder where you want to save the CSV files
+folder_path <- "E:/Soilwat/AET/"
+
+# Create a vector of data frame names
+df_names_5 <- c(
+  "Control_59A_U_weather_NW_5",
+  "Control_59A_U_weather_W_5",
+  "Control_59B_NU_weather_NW_5",
+  "Control_62A_U_weather_NW_5",
+  "Control_62A_U_weather_W_5",
+  "Control_59B_NU_weather_W_5",
+  "Control_62B_NU_weather_NW_5",
+  "Control_62B_NU_weather_W_5",
+  "Control_67A_U_weather_NW_5",
+  "Control_67A_U_weather_W_5",
+  "Control_67B_NU_weather_W_5",
+  "Control_67B_NU_weather_NW_5"
+)
+
+df_names_7 <- c(
+  "Control_62A_U_weather_NW_7", 
+  "Control_59A_U_weather_NW_7", 
+  "Control_59B_NU_weather_NW_7", 
+  "Control_59B_NU_weather_W_7", 
+  "Control_59A_U_weather_W_7", 
+  "Control_62A_U_weather_W_7",
+  "Control_62B_NU_weather_NW_7",
+  "Control_62B_NU_weather_W_7", 
+  "Control_67A_U_weather_NW_7", 
+  "Control_67A_U_weather_W_7",
+  "Control_67B_NU_weather_NW_7", 
+  "Control_67B_NU_weather_W_7"
+)
+df_names_10 <- c(
+  "Control_59A_U_weather_NW_10", 
+  "Control_59A_U_weather_W_10", 
+  "Control_59B_NU_weather_NW_10",  
+  "Control_59B_NU_weather_W_10", 
+  "Control_62A_U_weather_NW_10", 
+  "Control_62A_U_weather_W_10", 
+  "Control_62B_NU_weather_NW_10", 
+  "Control_62B_NU_weather_W_10", 
+  "Control_67A_U_weather_NW_10",
+  "Control_67A_U_weather_W_10", 
+  'Control_67B_NU_weather_NW_10', 
+  "Control_67B_NU_weather_W_10" 
+)
+# Iterate through the list of data frames
+#for (i in 1:length(Interval_5_list)) {
+ # df <- Interval_5_list[[i]]
+  
+  # Perform the subset operation
+ # df <- subset(df, Interval_5Day > 21 & Interval_5Day < 55)
+  
+  # Extract the name of the data frame for the filename from the vector
+ # df_name <- df_names_5[i]
+  
+  # Create the file path for saving the CSV
+ # file_name <- paste(df_name, ".csv", sep = "")
+ # file_path <- file.path(folder_path, file_name)
+  
+  # Write the data frame to a CSV file
+ # write.csv(df, file = file_path, row.names = FALSE)
+#}
+
+# # Iterate through the list of data frames
+# for (i in 1:length(Interval_7_list)) {
+#   df <- Interval_7_list[[i]]
+#   
+#   # Perform the subset operation
+#   df <- subset(df, Interval_7Day > 1 & Interval_7Day < 34)
+#   
+#   # Extract the name of the data frame for the filename from the vector
+#   df_name <- df_names_7[i]
+#   
+#   # Create the file path for saving the CSV
+#   file_name <- paste(df_name, ".csv", sep = "")
+#   file_path <- file.path(folder_path, file_name)
+#   
+#   # Write the data frame to a CSV file
+#   write.csv(df, file = file_path, row.names = FALSE)
+# }
+
+# Iterate through the list of data frames
+#for (i in 1:length(Interval_10_list)) {
+  #df <- Interval_10_list[[i]]
+  
+  # Perform the subset operation
+  #df <- subset(df, Interval_10Day > 12 & Interval_10Day < 27)
+  
+  # Extract the name of the data frame for the filename from the vector
+ # df_name <- df_names_10[i]
+  
+  # Create the file path for saving the CSV
+ # file_name <- paste(df_name, ".csv", sep = "")
+  #file_path <- file.path(folder_path, file_name)
+  
+  # Write the data frame to a CSV file
+ # write.csv(df, file = file_path, row.names = FALSE)
+#}
+
+```
+Sensor Calculation 2023
+```{r}
+start_date <- as.Date("2023-01-01")
+#59
+#Well_59_climate_23<-Well_59_climate_23[,-1]
+Well_62_climate_23<-Well_62_climate_23[,-1]
+Well_67_climate_23<-Well_67_climate_23[,-1]
+colnames(Well_59_climate_23_full)<-c("DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+Well_59_climate_23_full$Timestamps<-as.Date(Well_59_climate_23_full$DOY, origin = "2022-12-31")
+Well_59_climate_23_full$Value<-Well_59_climate_23_full$PPT_cm*10
+
+#59B 
+#No water addition
+condense_by_day_59B_NW_23 <- condense_by_day_59B_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port1","Port2"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59B_NU_NW_23<-condense_by_day_59B_NW_23[condense_by_day_59B_NW_23$Port %in% c("Port1","Port2"), ]
+Control_59B_NU_weather_NW_23 <-merge(Control_59B_NU_NW_23, Well_59_climate_23_full, by= "Timestamps", all.y=TRUE)
+#Water addition
+condense_by_day_59B_W_23 <- condense_by_day_59B_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port4", "Port5"), `m^3/m^3` * 100, `m^3/m^3`))
+condense_by_day_59B_W_23<-condense_by_day_59B_W_23[condense_by_day_59B_W_23$Port %in% c("Port4", "Port5"), ]
+Control_59B_NU_weather_W_23 <-merge(condense_by_day_59B_W_23, Well_59_climate_23_full, by= c("Timestamps"))
+#adding in water additions
+Control_59B_NU_weather_W_23 <- Control_59B_NU_weather_W_23 %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2023-05-31", "2023-06-9", "2023-06-15","2023-06-22")), Value + 10, Value))
+
+
+#function
+Control_59B_NU_weather_NW_23_5 <- calculate_water_balance(Control_59B_NU_weather_NW_23 , 5,start_date)
+Control_59B_NU_weather_NW_23_7 <- calculate_water_balance(Control_59B_NU_weather_NW_23 , 7,start_date)
+Control_59B_NU_weather_NW_23_10 <- calculate_water_balance(Control_59B_NU_weather_NW_23 , 10,start_date)
+
+#function
+Control_59B_NU_weather_W_23_5 <- calculate_water_balance(Control_59B_NU_weather_W_23 , 5,start_date)
+Control_59B_NU_weather_W_23_7 <- calculate_water_balance(Control_59B_NU_weather_W_23 , 7,start_date)
+Control_59B_NU_weather_W_23_10 <- calculate_water_balance(Control_59B_NU_weather_W_23 , 10,start_date)
+
+#59A 
+#No water additions
+condense_by_day_59A_NW_23 <- condense_by_day_59A_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c( "Port3","Port4"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59A_U_NW_23<-condense_by_day_59A_NW_23[condense_by_day_59A_NW_23$Port %in% c( "Port3","Port4"), ]
+Control_59A_U_weather_NW_23<-merge(Control_59A_U_NW_23, Well_59_climate_23_full, by= c("Timestamps"))
+#Water additions
+condense_by_day_59A_W_23 <- condense_by_day_59A_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port5", "Port6"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_59A_U_W_23<-condense_by_day_59A_W_23[condense_by_day_59A_W_23$Port %in% c("Port5", "Port6"), ]
+Control_59A_U_weather_W_23<-merge(Control_59A_U_W_23, Well_59_climate_23_full, by= c("Timestamps"))
+#adding in water additions
+Control_59A_U_weather_W_23 <- Control_59A_U_weather_W_23 %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2023-05-31", "2023-06-9", "2023-06-15","2023-06-22")), Value + 10, Value))
+
+
+#function
+Control_59A_U_weather_NW_23_5 <- calculate_water_balance(Control_59A_U_weather_NW_23, 5,start_date)
+Control_59A_U_weather_NW_23_7 <- calculate_water_balance(Control_59A_U_weather_NW_23, 7,start_date)
+Control_59A_U_weather_NW_23_10 <- calculate_water_balance(Control_59A_U_weather_NW_23, 10,start_date)
+
+Control_59A_U_weather_W_23_5 <- calculate_water_balance(Control_59A_U_weather_W_23, 5,start_date)
+Control_59A_U_weather_W_23_7 <- calculate_water_balance(Control_59A_U_weather_W_23, 7,start_date)
+Control_59A_U_weather_W_23_10 <- calculate_water_balance(Control_59A_U_weather_W_23, 10,start_date)
+
+#67B 
+#No water addition
+condense_by_day_67B_NW_23 <- condense_by_day_67B_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port1", "Port2"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67B_NU_NW_23<-condense_by_day_67B_NW_23[condense_by_day_67B_NW_23$Port %in% c("Port1", "Port2"), ]
+Control_67B_NU_weather_NW_23 <-merge(Control_67B_NU_NW_23, Well_67_climate_23, by= c("Timestamps"), all.y = TRUE)
+#Water addition
+condense_by_day_67B_W_23 <- condense_by_day_67B_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port4", "Port5"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67B_NU_W_23<-condense_by_day_67B_W_23[condense_by_day_67B_W_23$Port %in% c("Port4", "Port5"), ]
+Control_67B_NU_weather_W_23 <-merge(Control_67B_NU_W_23, Well_67_climate_23, by= c("Timestamps"), all.y = TRUE)
+#adding in water additions
+Control_67B_NU_weather_W_23 <- Control_67B_NU_weather_W_23 %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2023-06-01", "2023-06-05", "2023-06-13","2023-06-23")), Value + 10, Value))
+
+#Functions
+Control_67B_NU_weather_NW_23_5 <- calculate_water_balance(Control_67B_NU_weather_NW_23 , 5,start_date)
+Control_67B_NU_weather_NW_23_7 <- calculate_water_balance(Control_67B_NU_weather_NW_23 , 7, start_date)
+Control_67B_NU_weather_NW_23_10 <- calculate_water_balance(Control_67B_NU_weather_NW_23 , 10,start_date)
+
+Control_67B_NU_weather_W_23_5 <- calculate_water_balance(Control_67B_NU_weather_W_23 , 5,start_date)
+Control_67B_NU_weather_W_23_7 <- calculate_water_balance(Control_67B_NU_weather_W_23 , 7, start_date)
+Control_67B_NU_weather_W_23_10 <- calculate_water_balance(Control_67B_NU_weather_W_23 , 10,start_date)
+
+#67A 
+#No water additions
+condense_by_day_67A_NW_23 <- condense_by_day_67A_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port3","Port4"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67A_U_NW_23<-condense_by_day_67A_NW_23[condense_by_day_67A_NW_23$Port %in% c("Port3","Port4"), ]
+Control_67A_U_weather_NW_23<-merge(Control_67A_U_NW_23, Well_67_climate_23, by= c("Timestamps"))
+#Water additions
+condense_by_day_67A_W_23<- condense_by_day_67A_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port5", "Port6"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_67A_U_W_23<-condense_by_day_67A_W_23[condense_by_day_67A_W_23$Port %in% c("Port5", "Port6"), ]
+Control_67A_U_weather_W_23<-merge(Control_67A_U_W_23, Well_67_climate_23, by= c("Timestamps"))
+#adding in water additions
+Control_67A_U_weather_W_23 <- Control_67A_U_weather_W_23 %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2023-06-01", "2023-06-05", "2023-06-13","2023-06-23")), Value + 10, Value))
+
+#function
+Control_67A_U_weather_NW_23_5 <- calculate_water_balance(Control_67A_U_weather_NW_23, 5,start_date)
+Control_67A_U_weather_NW_23_7 <- calculate_water_balance(Control_67A_U_weather_NW_23, 7,start_date)
+Control_67A_U_weather_NW_23_10 <- calculate_water_balance(Control_67A_U_weather_NW_23, 10,start_date)
+
+Control_67A_U_weather_W_23_5 <- calculate_water_balance(Control_67A_U_weather_W_23, 5,start_date)
+Control_67A_U_weather_W_23_7 <- calculate_water_balance(Control_67A_U_weather_W_23, 7,start_date)
+Control_67A_U_weather_W_23_10 <- calculate_water_balance(Control_67A_U_weather_W_23, 10,start_date)
+
+#62B 
+#No water addition
+condense_by_day_62B_NW_23 <- condense_by_day_62B_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port1", "Port2"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62B_NU_NW_23<-condense_by_day_62B_NW_23[condense_by_day_62B_NW_23$Port %in% c("Port1", "Port2"), ]
+Control_62B_NU_weather_NW_23 <-merge(Control_62B_NU_NW_23, Well_62_climate_23, by= c("Timestamps"))
+#Water addition
+condense_by_day_62B_W_23 <- condense_by_day_62B_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port4", "Port5"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62B_NU_W_23<-condense_by_day_62B_W_23[condense_by_day_62B_W_23$Port %in% c("Port4", "Port5"), ]
+Control_62B_NU_weather_W_23 <-merge(Control_62B_NU_W_23, Well_62_climate_23, by= c("Timestamps"))
+#adding in water additions
+Control_62B_NU_weather_W_23 <- Control_62B_NU_weather_W_23 %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2023-06-03", "2023-06-10", "2023-06-16","2023-06-25")), Value + 10, Value))
+
+#function
+Control_62B_NU_weather_NW_23_5 <- calculate_water_balance(Control_62B_NU_weather_NW_23 , 5,start_date)
+Control_62B_NU_weather_NW_23_7 <- calculate_water_balance(Control_62B_NU_weather_NW_23 , 7,start_date)
+Control_62B_NU_weather_NW_23_10 <- calculate_water_balance(Control_62B_NU_weather_NW_23 , 10,start_date)
+
+Control_62B_NU_weather_W_23_5 <- calculate_water_balance(Control_62B_NU_weather_W_23 , 5,start_date)
+Control_62B_NU_weather_W_23_7 <- calculate_water_balance(Control_62B_NU_weather_W_23 , 7,start_date)
+Control_62B_NU_weather_W_23_10 <- calculate_water_balance(Control_62B_NU_weather_W_23 , 10,start_date)
+
+#62A 
+#No water additions
+condense_by_day_62A_NW_23 <- condense_by_day_62A_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port3", "Port4"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62A_U_NW_23<-condense_by_day_62A_NW_23[condense_by_day_62A_NW_23$Port %in% c("Port3", "Port4"), ]
+Control_62A_U_weather_NW_23<-merge(Control_62A_U_NW_23, Well_62_climate_23, by= c("Timestamps"))
+#Water additions
+condense_by_day_62A_W_23 <- condense_by_day_62A_23 %>%
+  mutate(`m^3/m^3` = ifelse(Port %in% c("Port5", "Port6"), `m^3/m^3` * 100, `m^3/m^3`))
+Control_62A_U_W_23<-condense_by_day_62A_W_23[condense_by_day_62A_W_23$Port %in% c("Port5", "Port6"), ]
+Control_62A_U_weather_W_23<-merge(Control_62A_U_W_23, Well_62_climate_23, by= c("Timestamps"))
+#adding in water additions
+Control_62A_U_weather_W_23 <- Control_62A_U_weather_W_23 %>%
+  mutate(Value = ifelse(Timestamps %in% as.Date(c("2023-06-03", "2023-06-10", "2023-06-16","2023-06-25")), Value + 10, Value))
+
+
+#function
+Control_62A_U_weather_NW_23_5 <- calculate_water_balance(Control_62A_U_weather_NW_23, 5,start_date)
+Control_62A_U_weather_NW_23_7 <- calculate_water_balance(Control_62A_U_weather_NW_23, 7,start_date)
+Control_62A_U_weather_NW_23_10 <- calculate_water_balance(Control_62A_U_weather_NW_23, 10,start_date)
+
+Control_62A_U_weather_W_23_5 <- calculate_water_balance(Control_62A_U_weather_W_23, 5,start_date)
+Control_62A_U_weather_W_23_7 <- calculate_water_balance(Control_62A_U_weather_W_23, 7,start_date)
+Control_62A_U_weather_W_23_10 <- calculate_water_balance(Control_62A_U_weather_W_23, 10,start_date)
+
+
+# List of dataframes
+Interval_5_list <- list(
+  Control_59A_U_weather_NW_23_5, 
+  Control_59B_NU_weather_NW_23_5, 
+  Control_62A_U_weather_NW_23_5, 
+  Control_62B_NU_weather_NW_23_5, 
+  Control_67A_U_weather_NW_23_5, 
+  Control_67B_NU_weather_NW_23_5 
+)
+Interval_7_list <- list(
+  Control_62A_U_weather_NW_23_7, 
+  Control_59A_U_weather_NW_23_7, 
+  Control_59B_NU_weather_NW_23_7, 
+  Control_62B_NU_weather_NW_23_7,
+  Control_67A_U_weather_NW_23_7, 
+  Control_67B_NU_weather_NW_23_7 
+)
+Interval_10_list <- list(
+  Control_59A_U_weather_NW_23_10, 
+  Control_59B_NU_weather_NW_23_10,  
+  Control_62A_U_weather_NW_23_10, 
+  Control_62B_NU_weather_NW_23_10, 
+  Control_67A_U_weather_NW_23_10,
+  Control_67B_NU_weather_NW_23_10
+  )
+
+# Define the folder where you want to save the CSV files
+folder_path <- "E:/Soilwat/AET"
+
+# Create a vector of data frame names
+df_names_5 <- c(
+  "Control_59A_U_weather_NW_23_5",
+  "Control_59B_NU_weather_NW_23_5",
+  "Control_62A_U_weather_NW_23_5",
+  "Control_62B_NU_weather_NW_23_5",
+  "Control_67A_U_weather_NW_23_5",
+  "Control_67B_NU_weather_NW_23_5"
+)
+
+df_names_7 <- c(
+  "Control_62A_U_weather_NW_23_7", 
+  "Control_59A_U_weather_NW_23_7", 
+  "Control_59B_NU_weather_NW_23_7", 
+  "Control_62B_NU_weather_NW_23_7",
+  "Control_67A_U_weather_NW_23_7", 
+  "Control_67B_NU_weather_NW_23_7"
+)
+df_names_10 <- c(
+  #"Control_59A_U_weather_NW_23_10", 
+  #"Control_59B_NU_weather_NW_23_10",  
+  "Control_62A_U_weather_NW_23_10", 
+  "Control_62B_NU_weather_NW_23_10", 
+  "Control_67A_U_weather_NW_23_10",
+  'Control_67B_NU_weather_NW_23_10'
+)
+# Iterate through the list of data frames
+#for (i in 1:length(Interval_5_list)) {
+ # df <- Interval_5_list[[i]]
+  
+  # Perform the subset operation
+ # df <- subset(df, Interval_5Day > 21 & Interval_5Day < 62)
+  
+  # Extract the name of the data frame for the filename from the vector
+ # df_name <- df_names_5[i]
+  
+  # Create the file path for saving the CSV
+  #file_name <- paste(df_name, ".csv", sep = "")
+  #file_path <- file.path(folder_path, file_name)
+  
+  # Write the data frame to a CSV file
+  #write.csv(df, file = file_path, row.names = FALSE)
+#}
+
+# Iterate through the list of data frames
+# for (i in 1:length(Interval_7_list)) {
+#   df <- Interval_7_list[[i]]
+#   
+#   # Perform the subset operation
+#   df <- subset(df, Interval_7Day > 0 & Interval_7Day < 43)
+#   
+#   # Extract the name of the data frame for the filename from the vector
+#   df_name <- df_names_7[i]
+#   
+#   # Create the file path for saving the CSV
+#   file_name <- paste(df_name, ".csv", sep = "")
+#   file_path <- file.path(folder_path, file_name)
+#   
+#   # Write the data frame to a CSV file
+#   write.csv(df, file = file_path, row.names = FALSE)
+# }
+
+# Iterate through the list of data frames
+#for (i in 1:length(Interval_10_list)) {
+  #df <- Interval_10_list[[i]]
+  
+  # Perform the subset operation
+  #df <- subset(df, Interval_10Day > 12 & Interval_10Day < 33)
+  
+  # Extract the name of the data frame for the filename from the vector
+  #df_name <- df_names_10[i]
+  
+  # Create the file path for saving the CSV
+  #file_name <- paste(df_name, ".csv", sep = "")
+  #file_path <- file.path(folder_path, file_name)
+  
+  # Write the data frame to a CSV file
+  #write.csv(df, file = file_path, row.names = FALSE)
+#}
+
+```
+Uploading and formatting data for field Visuals
+```{r}
+Filepath2<-folder_path <- "E:/Soilwat/AET"
+#59
+Control_59B_NU_weather_NW_23_7<- read.csv(file.path(Filepath2,"Control_59B_NU_weather_NW_23_7.csv"))
+Control_59A_U_weather_NW_23_7<- read.csv(file.path(Filepath2,"Control_59A_U_weather_NW_23_7.csv"))
+
+Control_59B_NU_weather_NW_7<- read.csv(file.path(Filepath2,"Control_59B_NU_weather_NW_7.csv"))
+Control_59A_U_weather_NW_7<- read.csv(file.path(Filepath2,"Control_59A_U_weather_NW_7.csv"))
+#62
+Control_62B_NU_weather_NW_23_7<- read.csv(file.path(Filepath2,"Control_62B_NU_weather_NW_23_7.csv"))
+Control_62A_U_weather_NW_23_7<- read.csv(file.path(Filepath2,"Control_62A_U_weather_NW_23_7.csv"))
+
+Control_62B_NU_weather_NW_7<- read.csv(file.path(Filepath2,"Control_62B_NU_weather_NW_7.csv"))
+Control_62A_U_weather_NW_7<- read.csv(file.path(Filepath2,"Control_62A_U_weather_NW_7.csv"))
+#67
+Control_67B_NU_weather_NW_23_7<- read.csv(file.path(Filepath2,"Control_67B_NU_weather_NW_23_7.csv"))
+Control_67A_U_weather_NW_23_7<- read.csv(file.path(Filepath2,"Control_67A_U_weather_NW_23_7.csv"))
+
+Control_67B_NU_weather_NW_7<- read.csv(file.path(Filepath2,"Control_67B_NU_weather_NW_7.csv"))
+Control_67A_U_weather_NW_7<- read.csv(file.path(Filepath2,"Control_67A_U_weather_NW_7.csv"))
+library(ggplot2)
+
+# Assuming you have a data frame named df
+
+# Calculate the cumulative sum of the water_balance column
+Control_59B_NU_weather_NW_23_7<-na.omit(Control_59B_NU_weather_NW_23_7)
+Control_59B_NU_weather_NW_23_7$Cumulative_Water_Balance <- cumsum(abs(Control_59B_NU_weather_NW_23_7$Water_Balance))
+Control_59B_NU_weather_NW_23_7$First_Date<-as.Date.character(Control_59B_NU_weather_NW_23_7$First_Date,format =  "%Y-%m-%d")
+
+Control_59A_U_weather_NW_23_7<-na.omit(Control_59A_U_weather_NW_23_7)
+Control_59A_U_weather_NW_23_7$Cumulative_Water_Balance <- cumsum(abs(Control_59A_U_weather_NW_23_7$Water_Balance))
+Control_59A_U_weather_NW_23_7$First_Date<-as.Date.character(Control_59A_U_weather_NW_23_7$First_Date,format =  "%Y-%m-%d")
+Control_59A_U_weather_NW_23_7<-subset(Control_59A_U_weather_NW_23_7, First_Date<"2023-08-10")
+
+Control_59B_NU_weather_NW_7$First_Date<-as.Date.character(Control_59B_NU_weather_NW_7$First_Date,format =  "%Y-%m-%d")
+Control_59B_NU_weather_NW_7<-subset(Control_59B_NU_weather_NW_7, First_Date<"2022-08-10" & First_Date >"2022-04-30")
+Control_59B_NU_weather_NW_7<-na.omit(Control_59B_NU_weather_NW_7)
+Control_59B_NU_weather_NW_7$Cumulative_Water_Balance <- cumsum(abs(Control_59B_NU_weather_NW_7$Water_Balance))
+
+Control_59A_U_weather_NW_7$First_Date<-as.Date.character(Control_59A_U_weather_NW_7$First_Date,format =  "%Y-%m-%d")
+Control_59A_U_weather_NW_7<-subset(Control_59A_U_weather_NW_7, First_Date<"2022-08-10" & First_Date>"2022-04-30")
+Control_59A_U_weather_NW_7<-na.omit(Control_59A_U_weather_NW_7)
+Control_59A_U_weather_NW_7$Cumulative_Water_Balance <- cumsum(abs(Control_59A_U_weather_NW_7$Water_Balance))
+
+#62
+Control_62B_NU_weather_NW_23_7<-na.omit(Control_62B_NU_weather_NW_23_7)
+Control_62B_NU_weather_NW_23_7$Cumulative_Water_Balance <- cumsum(abs(Control_62B_NU_weather_NW_23_7$Water_Balance))
+Control_62B_NU_weather_NW_23_7$First_Date<-as.Date.character(Control_62B_NU_weather_NW_23_7$First_Date,format =   "%Y-%m-%d")
+
+Control_62A_U_weather_NW_23_7<-na.omit(Control_62A_U_weather_NW_23_7)
+Control_62A_U_weather_NW_23_7$Cumulative_Water_Balance <- cumsum(abs(Control_62A_U_weather_NW_23_7$Water_Balance))
+Control_62A_U_weather_NW_23_7$First_Date<-as.Date.character(Control_62A_U_weather_NW_23_7$First_Date,format =   "%Y-%m-%d")
+Control_62A_U_weather_NW_23_7<-subset(Control_62A_U_weather_NW_23_7, First_Date<"2023-08-10")
+
+Control_62B_NU_weather_NW_7$First_Date<-as.Date.character(Control_62B_NU_weather_NW_7$First_Date,format =  "%Y-%m-%d")
+Control_62B_NU_weather_NW_7<-subset(Control_62B_NU_weather_NW_7, First_Date<"2022-08-10" & First_Date >"2022-04-30")
+Control_62B_NU_weather_NW_7<-na.omit(Control_62B_NU_weather_NW_7)
+Control_62B_NU_weather_NW_7$Cumulative_Water_Balance <- cumsum(abs(Control_62B_NU_weather_NW_7$Water_Balance))
+
+Control_62A_U_weather_NW_7$First_Date<-as.Date.character(Control_62A_U_weather_NW_7$First_Date,format =  "%Y-%m-%d")
+Control_62A_U_weather_NW_7<-subset(Control_62A_U_weather_NW_7, First_Date<"2022-08-10" & First_Date>"2022-04-30")
+Control_62A_U_weather_NW_7<-na.omit(Control_62A_U_weather_NW_7)
+Control_62A_U_weather_NW_7$Cumulative_Water_Balance <- cumsum(abs(Control_62A_U_weather_NW_7$Water_Balance))
+
+#67
+
+Control_67B_NU_weather_NW_23_7$First_Date<-as.Date.character(Control_67B_NU_weather_NW_23_7$First_Date,format =   "%Y-%m-%d")
+Control_67B_NU_weather_NW_23_7<-subset(Control_67B_NU_weather_NW_23_7, First_Date<"2023-08-10"& First_Date >"2023-05-17")
+Control_67B_NU_weather_NW_23_7<-na.omit(Control_67B_NU_weather_NW_23_7)
+Control_67B_NU_weather_NW_23_7$Cumulative_Water_Balance <- cumsum(abs(Control_67B_NU_weather_NW_23_7$Water_Balance))
+
+
+Control_67A_U_weather_NW_23_7$First_Date<-as.Date.character(Control_67A_U_weather_NW_23_7$First_Date,format =   "%Y-%m-%d")
+Control_67A_U_weather_NW_23_7<-subset(Control_67A_U_weather_NW_23_7, First_Date<"2023-08-10"& First_Date >"2023-05-17")
+Control_67A_U_weather_NW_23_7<-na.omit(Control_67A_U_weather_NW_23_7)
+Control_67A_U_weather_NW_23_7$Cumulative_Water_Balance <- cumsum(abs(Control_67A_U_weather_NW_23_7$Water_Balance))
+
+Control_67B_NU_weather_NW_7$First_Date<-as.Date.character(Control_67B_NU_weather_NW_7$First_Date,format =  "%m/%d/%Y")
+Control_67B_NU_weather_NW_7<-subset(Control_67B_NU_weather_NW_7, First_Date<"2022-08-10" & First_Date >"2022-06-04")
+Control_67B_NU_weather_NW_7<-na.omit(Control_67B_NU_weather_NW_7)
+
+Control_67B_NU_weather_NW_7$Cumulative_Water_Balance <- cumsum(abs(Control_67B_NU_weather_NW_7$Water_Balance))
+
+Control_67A_U_weather_NW_7$First_Date<-as.Date.character(Control_67A_U_weather_NW_7$First_Date,format =  "%Y-%m-%d")
+Control_67A_U_weather_NW_7<-subset(Control_67A_U_weather_NW_7, First_Date<"2022-08-10" & First_Date>"2022-06-04")
+Control_67A_U_weather_NW_7<-na.omit(Control_67A_U_weather_NW_7)
+Control_67A_U_weather_NW_7$Cumulative_Water_Balance <- cumsum(abs(Control_67A_U_weather_NW_7$Water_Balance))
+```
+```{r}
+# Create a cumulative graph using ggplot2
+Field_59_2023<-ggplot() +
+  geom_line(data = Control_59B_NU_weather_NW_23_7, aes(x = First_Date, y = Water_Balance, color="Without Understory")) +
+  geom_line(data = Control_59A_U_weather_NW_23_7, aes(x = First_Date, y = Water_Balance, color="With Understory"))+
+  labs(x = "Date", y = "Cumulative AET (mm) ") +
+  ggtitle("Weekly AET (mm) for Well 59 2023")+ theme(legend.position = "right")+ 
+  scale_color_manual(
+    values = c("With Understory" = "blue", "Without Understory" = "red"),
+    labels = c("With Understory", "Without Understory"))+ theme(
+  plot.background = element_rect(fill = "white")
+)
+
+Field_59_2022<-ggplot() +
+  geom_line(data = Control_59B_NU_weather_NW_7, aes(x = First_Date, y = Water_Balance, color="Without Understory")) +
+  geom_line(data = Control_59A_U_weather_NW_7, aes(x = First_Date, y = Water_Balance, color="With Understory"))+
+  labs(x = "Date", y = "Cumulative AET (mm) ") +
+  ggtitle("Weekly AET (mm)for Well 59 2022")+ theme(legend.position = "right")+ 
+  scale_color_manual(
+    values = c("With Understory" = "blue", "Without Understory" = "red"),
+    labels = c("With Understory", "Without Understory"))+ theme(
+  plot.background = element_rect(fill = "white")
+)
+
+Field_62_2023<-ggplot() +
+  geom_line(data = Control_62B_NU_weather_NW_23_7, aes(x = First_Date, y = Water_Balance, color="Without Understory")) +
+  geom_line(data = Control_62A_U_weather_NW_23_7, aes(x = First_Date, y = Water_Balance, color="With Understory"))+
+  labs(x = "Date", y = "Cumulative AET (mm) ") +
+  ggtitle("Weekly AET (mm) for Well 62 2023")+ theme(legend.position = "right")+ 
+  scale_color_manual(
+    values = c("With Understory" = "blue", "Without Understory" = "red"),
+    labels = c("With Understory", "Without Understory"))+ theme(
+  plot.background = element_rect(fill = "white")
+)
+
+Field_62_2022<-ggplot() +
+  geom_line(data = Control_62B_NU_weather_NW_7, aes(x = First_Date, y = Water_Balance, color="Without Understory")) +
+  geom_line(data = Control_62A_U_weather_NW_7, aes(x = First_Date, y = Water_Balance, color="With Understory"))+
+  labs(x = "Date", y = "Cumulative AET (mm) ") +
+  ggtitle("Weekly AET (mm) for Well 62 2022")+ theme(legend.position = "right")+ 
+  scale_color_manual(
+    values = c("With Understory" = "blue", "Without Understory" = "red"),
+    labels = c("With Understory", "Without Understory"))+ theme(
+  plot.background = element_rect(fill = "white")
+)
+
+Field_67_2023<-ggplot() +
+  geom_line(data = Control_67B_NU_weather_NW_23_7, aes(x = First_Date, y = Water_Balance, color="Without Understory")) +
+  geom_line(data = Control_67A_U_weather_NW_23_7, aes(x = First_Date, y = Water_Balance, color="With Understory"))+
+  labs(x = "Date", y = "Cumulative AET (mm) ") +
+  ggtitle("Weekly AET (mm) for Well 67 2023")+ theme(legend.position = "right")+ 
+  scale_color_manual(
+    values = c("With Understory" = "blue", "Without Understory" = "red"),
+    labels = c("With Understory", "Without Understory"))+ theme(
+  plot.background = element_rect(fill = "white")
+)
+
+Field_67_2022<-ggplot() +
+  geom_line(data = Control_67B_NU_weather_NW_7, aes(x = First_Date, y = Water_Balance, color="Without Understory")) +
+  geom_line(data = Control_67A_U_weather_NW_7, aes(x = First_Date, y = Water_Balance, color="With Understory"))+
+  labs(x = "Date", y = "Cumulative AET (mm) ") +
+  ggtitle("Weekly AET (mm) for Well 67 2022")+ theme(legend.position = "right")+ 
+  scale_color_manual(
+    values = c("With Understory" = "blue", "Without Understory" = "red"),
+    labels = c("With Understory", "Without Understory"))+ theme(
+  plot.background = element_rect(fill = "white")
+)
+library(grid)
+# Define a list of ggplot objects
+ggplots_1 <- list(
+  Field_59_2022, Field_59_2023,
+  Field_62_2023, Field_62_2022,
+  Field_67_2023, Field_67_2022
+)
+
+# Define a list of file names for the PNG files
+file_names_1 <- c(
+  "Field_59_2022.png", "Field_59_2023.png",
+  "Field_62_2023.png", "Field_62_2022.png",
+  "Field_67_2023.png", "Field_67_2022.png"
+)
+
+  ggsave("E:/Soilwat/AET/Field_59_2022.png", plot = Field_59_2022, width = 15, height = 12, dpi = 500, units = "in", device = "png")
+    ggsave("E:/Soilwat/AET/Field_59_2023.png", plot = Field_59_2023, width = 15, height = 12, dpi = 500, units = "in", device = "png")
+      ggsave("E:/Soilwat/AET/Field_62_2023.png", plot = Field_62_2023, width = 15, height = 12, dpi = 500, units = "in", device = "png")
+        ggsave("E:/Soilwat/AET/Field_62_2022.png", plot = Field_62_2022, width = 15, height = 12, dpi = 500, units = "in", device = "png")
+          ggsave("E:/Soilwat/AET/Field_67_2023.png", plot = Field_67_2023, width = 15, height = 12, dpi = 500, units = "in", device = "png")
+            ggsave("E:/Soilwat/AET/Field_67_2022.png", plot = Field_67_2022, width = 15, height = 12, dpi = 500, units = "in", device = "png")
+            
+```
+Attach to google drive and clone repository
+```{r}
+register_google(key = "[AIzaSyDRdNenBnTVbk8L0Ob1jzNHb8AF45ZqBXU]", write = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "G:/My Drive")
+getwd()
+#install.packages("Rcpp")
+
+#remotes::install_github("R-ArcGIS/r-bridge")
+library(rSOILWAT2)
+#install.packages("rsfsws")
+library(git2r)
+root_folder <- 'G:/My Drive/Pinedale'
+
+sw_args <- function(dir, files.in, echo, quiet) {
+  input <- "SOILWAT2"
+
+  if (dir != "")
+    input <- c(input, "-d", dir)
+  if (files.in != "")
+    input <- c(input, "-f", files.in)
+  if (echo)
+    input <- c(input, "-e")
+  if (quiet)
+    input <- c(input, "-q")
+
+  input
+}
+
+path_demo <- system.file("extdata", "example1", package = "rSOILWAT2")
+
+sw_in <- rSOILWAT2::sw_exampleData
+```
+Rerunning SOILWAT sites with sensor data as year 2010 for weather data
+```{r}
+Climate_data_2022_59<-Climate_data_2022
+Climate_data_2022_59$Year<-rep(2010)
+Climate_data_2022_62$Year<-rep(2010)
+Climate_data_2022_67$Year<-rep(2010)
+
+Climate_data_2023_59<-Well_59_climate_23_full[,1:4]
+Climate_data_2023_59$Year<-rep(2010)
+Well_62_climate_23_full$Year<-rep(2010)
+Well_67_climate_23_full$Year<-rep(2010)
+
+###Water addition
+
+Climate_data_2022_59_WA<-Climate_data_2022_WA
+Climate_data_2022_59_WA$Year<-rep(2010)
+Climate_data_2022_62_WA$Year<-rep(2010)
+Climate_data_2022_67_WA$Year<-rep(2010)
+
+Climate_data_2023_59_WA<-Climate_data_2022_WA[,1:4]
+Climate_data_2023_59_WA$Year<-rep(2010)
+Climate_data_2023_62_WA$Year<-rep(2010)
+Climate_data_2023_67_WA$Year<-rep(2010)
+
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (1992 - 1980)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2022_59 )
+     
+       wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata2 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata2))
+    }
+}
+
+
+
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (1992 - 1980)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2022_62 )
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata3 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata3))
+    }
+}
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (1992 - 1980)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2022_67 )
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata4 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata4))
+    }
+}
+
+
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2023_59 )
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata5 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata5))
+    }
+}
+
+
+
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (1992 - 1980)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Well_62_climate_23_full )
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata6 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata6))
+    }
+}
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (1992 - 1980)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Well_67_climate_23_full )
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata7 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata7))
+    }
+}
+
+
+
+
+###Water Add
+
+
+###23
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2023_59_WA)
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata_WA23_59 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata_WA23_59))
+    }
+}
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2023_62_WA)
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata_WA23_62 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata_WA23_62))
+    }
+}
+
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2023_67_WA)
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata_WA23_67 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata_WA23_67))
+    }
+}
+
+###2022
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2022_59_WA)
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata_WA22_59 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata_WA22_59))
+    }
+}
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2022_62_WA)
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata_WA22_62 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata_WA22_62))
+    }
+}
+if (
+    requireNamespace("daymetr") &&
+    requireNamespace("curl") &&
+    curl::has_internet()
+  ) {
+
+    # Download from `DayMet`
+    dm_pinedale <- try(daymetr::download_daymet(
+      site = "Well_56",
+      lat = 42.6211031,
+      lon = -110.1064061,
+      start = 1992,
+      end = 2022,
+      internal = TRUE,
+      simplify = FALSE
+    ))
+
+    if (!inherits(dm_pinedale, "try-error")) {
+      # Convert data to a `rSOILWAT2`-formatted weather object
+      vars <- c("year", "yday", "tmax..deg.c.", "tmin..deg.c.", "prcp..mm.day.")
+      xdf <- dm_pinedale[["data"]][, vars]
+      xdf[, "prcp..mm.day."] <- xdf[, "prcp..mm.day."] / 10 # convert mm -> cm
+      colnames(xdf) <- c("Year", "DOY", "Tmax_C", "Tmin_C", "PPT_cm")
+
+      xdf$Year <- xdf$Year - (12)
+      xdf <- xdf[xdf$Year < 2010, ]
+      xdf<-rbind(xdf,Climate_data_2022_67_WA)
+      wdata_dm <- rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf)
+
+      # Convert `DayMet`'s `noleap` calendar to proleptic Gregorian calendar
+      xdf2 <- rSOILWAT2::dbW_convert_to_GregorianYears(weatherData = wdata_dm)
+
+      wdata_WA22_67 <- rSOILWAT2::dbW_generateWeather(
+        weatherData = rSOILWAT2::dbW_dataframe_to_weatherData(weatherDF = xdf2),
+        seed = 123
+      )
+
+      # Check that weather data is well-formed
+      stopifnot(rSOILWAT2::dbW_check_weatherData(wdata_WA22_67))
+    }
+}
+
+
+```
+Create base rSOILWAT2 input object with soil conditions and execute 
+```{r}
+run_sw_exec <- function(sand_frac, clay_frac, gravel_content, bulkDensity_g.cm.3, wdata, understory, understory_biomass, Shrub, Grass, Bareground, Forb1, Forb2, Succulent) {
+  
+sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
+  # Note: `estimate_PotNatVeg_composition()` does not estimate fractional cover
+  # of trees, bare-ground, etc. and sets those to zero or any other user
+  # defined value
+
+clim <- rSOILWAT2::calc_SiteClimate(weatherList = wdata, do_C4vars = TRUE)
+#Generate data off Weekmet data
+veg_cover <- rSOILWAT2::estimate_PotNatVeg_composition(
+MAP_mm = 10 * clim[["MAP_cm"]],
+MAT_C = clim[["MAT_C"]],
+mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+dailyC4vars = clim[["dailyC4vars"]]
+)
+# Ensure the sum of all components in veg_cover is equal to 1
+#Here I'm manually changing calculated starting veg values for later calculations.  3 different veg_cover outputs, were low shrub cover (10%), moderate shrub cover (40%), and high shrub cover (60%). the values of Rel_Abundance_L0 and Rel_Abundance_L1 need to add up to 1. low shrub cover( grass 43%, forbs 23%), moderate shrub cover (grass 26%, forbs 16%), and high shrub cover (grass 15%, forbs 12%) (Pennington et al., 2019).   grasses is 20%.
+if (understory) {
+veg_cover[["Rel_Abundance_L1"]][["SW_TREES"]]<-0
+veg_cover[["Rel_Abundance_L1"]][["SW_SHRUB"]]<-Shrub
+veg_cover[["Rel_Abundance_L1"]][["SW_FORBS"]]<-Forb1
+veg_cover[["Rel_Abundance_L1"]][["SW_GRASS"]]<-Grass
+veg_cover[["Rel_Abundance_L1"]][["SW_BAREGROUND"]]<-Bareground
+
+
+veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]]<-Grass
+veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["Shrubs"]]<-Shrub
+veg_cover[["Rel_Abundance_L0"]][["Forbs"]]<-Forb2
+veg_cover[["Rel_Abundance_L0"]][["Trees"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["BareGround"]]<-Bareground
+veg_cover[["Rel_Abundance_L0"]][["Succulents"]]<-Succulent
+veg_cover[["Grasses"]][["Grasses_C3"]]<-1
+
+}else {
+veg_cover[["Rel_Abundance_L1"]][["SW_TREES"]]<-0
+veg_cover[["Rel_Abundance_L1"]][["SW_SHRUB"]]<-Shrub
+veg_cover[["Rel_Abundance_L1"]][["SW_FORBS"]]<-.0
+veg_cover[["Rel_Abundance_L1"]][["SW_GRASS"]]<-.0
+veg_cover[["Rel_Abundance_L1"]][["SW_BAREGROUND"]]<-1-Shrub
+
+
+veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]]<-.0
+veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["Shrubs"]]<-Shrub
+veg_cover[["Rel_Abundance_L0"]][["Forbs"]]<-0.0
+veg_cover[["Rel_Abundance_L0"]][["Trees"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["BareGround"]]<-1-Shrub
+veg_cover[["Rel_Abundance_L0"]][["Succulents"]]<-0.0
+veg_cover[["Grasses"]][["Grasses_C3"]]<-1
+}
+
+ids <- sapply(
+    X = names(rSOILWAT2::swProd_Composition(sw_in3)),
+ FUN = function(x) {
+    grep(
+      pattern = substr(x, 1, 4),
+      x = names(veg_cover[["Rel_Abundance_L1"]]),
+     ignore.case = TRUE
+    )
+  }
+)
+  # Assign fractional cover values to rSOILWAT2 input object
+rSOILWAT2::swProd_Composition(sw_in3) <- veg_cover[["Rel_Abundance_L1"]][ids]
+    ### Biomass amount and phenology (for shrubs and grasses)
+  # Reference biomass values from Bradford et al. 2014 are used
+  # Mean monthly reference temperature corresponding to default phenology values
+  # for the median across 898 big sagebrush sites are used
+  veg_biom_mod_U <- rSOILWAT2::estimate_PotNatVeg_biomass(
+    target_temp = clim[["meanMonthlyTempC"]],
+    target_MAP_mm = 10 * clim[["MAP_cm"]],
+    do_adjust_phenology = TRUE,
+    do_adjust_biomass = TRUE,
+    fgrass_c3c4ann = veg_cover[["Grasses"]],
+  )
+  
+a<-as.data.frame(veg_biom_mod_U$grass)
+a$Biomass<-rep(understory_biomass)
+a<-as.matrix(a)
+veg_biom_mod_U$grass<-a
+  # Assign monthly biomass values to rSOILWAT2 input object
+  # Note: monthly biomass values of forbs, trees, etc. need to be estimated
+  v1 <- c("Litter", "Biomass", "Perc.Live")
+  v2 <- c("Litter", "Biomass", "Live_pct")
+  rSOILWAT2::swProd_MonProd_grass(sw_in3)[, v2] <- veg_biom_mod_U[["grass"]][, v1]
+  rSOILWAT2::swProd_MonProd_shrub(sw_in3)[, v2] <- veg_biom_mod_U[["shrub"]][, v1]
+  
+  ### Rooting profiles of vegetation types
+
+  # Select rooting profile types
+  # Set those to "FILL" where cover == 0 (because of transpiration regions)
+  trco_type_by_veg <- list(
+    grass_C3 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]] > 0) {
+      "SchenkJackson2003_PCdry_grasses"
+    } else {
+      "FILL"
+    },
+    grass_C4 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]] > 0) {
+      "SchenkJackson2003_PCdry_grasses"
+    } else {
+      "FILL"
+    },
+    grass_annuals = if (
+      veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]] > 0
+    ) {
+      "Jacksonetal1996_crops"
+    } else {
+      "FILL"
+    },
+    shrub = if (veg_cover[["Rel_Abundance_L0"]][["Shrubs"]] > 0) {
+      "SchenkJackson2003_PCdry_shrubs"
+    } else {
+      "FILL"
+    },
+    forb = if (veg_cover[["Rel_Abundance_L0"]][["Forbs"]] > 0) {
+      "SchenkJackson2003_PCdry_forbs"
+    } else {
+      "FILL"
+    },
+    tree = if (veg_cover[["Rel_Abundance_L0"]][["Trees"]] > 0) {
+      "Bradfordetal2014_LodgepolePine"
+    } else {
+      "FILL"
+    }
+  )
+
+  # Create a soil_fixed data frame with the specified input values
+ soil_fixed <- data.frame(
+    depth_cm = c(5, 10, 20, 30, 40,60,80,100),
+    bulkDensity_g.cm.3 = bulkDensity_g.cm.3,
+    gravel_content = gravel_content,
+    EvapBareSoil_frac = c(0.9182,0.0818,0.000,0.000,0.000,0.000,0.000,0.000),
+    transpGrass_frac = c(0.1978543,0.1651257,0.2528258,0.3841942,0.3841942,0.2528258,0.3841942,0.3841942),
+    transpShrub_frac = c(0.1585857,0.1414536,0.2387138,0.4612469,0.4612469,0.2387138,0.4612469,0.4612469),
+    transpTree_frac =  c(0.1,0.1,0.2,0.6,0.4,0.2,0.6,0.4),
+    transpForb_frac = c(0.1978543,0.1651257,0.2528258,0.3841942,0.3841942,0.2528258,0.3841942,0.3841942),
+    sand_frac = sand_frac,
+    clay_frac = clay_frac,
+    impermeability_frac = c(0,0,0,0,0,0,0,0),
+    soilTemp_c = c(-0.9803060,-0.9606121,-0.9212242,-0.8030605, -0.8030605,-0.9212242,-0.8030605, -0.8030605)
+  )
+soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in3)[0, ])
+  
+soil_new[seq_len(nrow(soil_fixed)), ] <- soil_fixed
+
+  veg_roots <- rSOILWAT2::estimate_PotNatVeg_roots(
+    layers_depth = soil_new[, "depth_cm"],
+    trco_type_by_veg = trco_type_by_veg,
+    fgrass_c3c4ann = veg_cover[["Grasses"]]
+  )
+
+  # Add rooting profile to soil
+  v1 <- c("Grass", "Shrub", "Tree", "Forb")
+  v2 <- paste0("transp", v1, "_frac")
+  soil_new[, v2] <- veg_roots[, v1]
+
+  # Create a new sw_in object with soil_new
+  rSOILWAT2::swSoils_Layers(sw_in3) <- data.matrix(soil_new)
+
+  # Run sw_in through rSOILWAT2::sw_exec() to create sw_out
+  sw_out <- rSOILWAT2::sw_exec(inputData = sw_in3, weatherList = wdata)
+  
+  return(sw_out)
+}
+#2023
+#Understory
+result_67_U_23<- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata7, 
+ understory=TRUE,
+ understory_biomass = 120,
+ Shrub=.3, 
+ Grass=.2, 
+ Bareground=.40, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0
+ )
+
+output_VWC_67_U_23<-as.data.frame(result_67_U_23@VWCBULK@Day)
+output_AET_67_U_23<-as.data.frame(result_67_U_23@AET@Day)
+Well_67_2023_Understory<-subset(output_AET_67_U_23, Year==2010 )
+result_67_U_23@SWPMATRIC@Day
+
+result_62_U_23 <- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata6,
+  understory=TRUE,
+  understory_biomass = 220,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+SOILWAT2_SWPMATRIC<-as.data.frame(result_62_U_23@SWPMATRIC@Day) 
+SOILWAT2_SWPMATRIC2<-SOILWAT2_SWPMATRIC[,c("Year","Day","Lyr_1","Lyr_2","Lyr_3","Lyr_4")]
+
+SOILWAT2_SWPMATRIC$SWP_mean <- rowMeans(SOILWAT2_SWPMATRIC2[, c("Lyr_1", "Lyr_2", "Lyr_3", "Lyr_4")])
+SOILWAT2_SWPMATRIC$Lat<-rep(1)
+SOILWAT2_SWPMATRIC$Lon<-rep(2)
+diff_1 <- SOILWAT2_SWPMATRIC %>%
+  dplyr::group_by(Year, Lat, Lon) %>%
+  dplyr::mutate(Difference = c(NA, diff(SWP_mean))) %>%
+ dplyr:: ungroup() %>%
+dplyr::select(Year, Day, Difference, Lat, Lon)
+
+diff_1 <- na.omit(diff_1)
+positive_increases_per_year <- aggregate(Difference ~ Year, data = diff_1, function(x) sum(x > 0))
+names(positive_increases_per_year)[2] <- "PositiveIncreases"
+
+positive_increases_per_1980<-subset(SOILWAT2_SWPMATRIC, Year==1980)
+
+detect_transitions <- function(x) {
+  signs <- sign(x)
+  changes <- c(NA, diff(signs))
+  sum(changes == 2, na.rm = TRUE)
+}
+
+# Apply the function for each year using aggregate
+transitions_per_year <- aggregate(Difference ~ Year+Lat+Lon, data = diff_1, FUN = detect_transitions)  
+
+# Set the column name for clarity
+names(transitions_per_year)[2] <- "Transitions"
+
+ggplot()+
+  geom_line(data = diff_1, aes(x=Day,y=Difference))
+```
+output_VWC_62_U_23<-as.data.frame(result_62_U_23@VWCBULK@Day)
+output_AET_62_U_23<-as.data.frame(result_62_U_23@AET@Day)
+PET_62_23<-as.data.frame(result_62_U_23@PET@Day)
+Well_62_2023_Understory<-subset(output_AET_62_U_23, Year==2010 )
+
+
+result_59_U_23 <- run_sw_exec(
+  sand_frac = c(.625290116, .5534493101, .5453490698, .4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3=c(1.633969952,
+0.710720652,
+1.012121212,
+1.354265343,
+1.354265343,1.354265343,1.354265343,1.354265343),
+  wdata = wdata5,
+  understory=TRUE,
+  understory_biomass = 130,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.08, 
+ Succulent=0.02)
+
+output_VWC_59_U_23<-as.data.frame(result_59_U_23@VWCBULK@Day)
+output_AET_59_U_23<-as.data.frame(result_59_U_23@AET@Day)
+Well_59_2023_Understory<-subset(output_AET_59_U_23, Year==2010 )
+#No Understory
+result_67_NU_23 <- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata7, 
+ understory=FALSE,
+ understory_biomass = 0,
+ Shrub=.3, 
+ Grass=.2, 
+ Bareground=.40, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_67_NU_23<-as.data.frame(result_67_NU_23@VWCBULK@Day)
+output_AET_67_NU_23<-as.data.frame(result_67_NU_23@AET@Day)
+Well_67_2023_NU<-subset(output_AET_67_NU_23, Year==2010 )
+
+
+result_62_NU_23 <- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata6,
+  understory=FALSE,
+  understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_NU_23<-as.data.frame(result_62_NU_23@VWCBULK@Day)
+output_AET_62_NU_23<-as.data.frame(result_62_NU_23@AET@Day)
+Well_62_2023_NU<-subset(output_AET_62_NU_23, Year==2010 )
+
+
+result_59_NU_23 <- run_sw_exec(
+  sand_frac = c(.625290116,.5534493101,.5453490698,.4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+ bulkDensity_g.cm.3=c(1.633969952,
+0.710720652,
+1.012121212,
+1.354265343,
+1.354265343,1.354265343,1.354265343,1.354265343),
+   wdata = wdata5,
+  understory=FALSE,
+  understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.08, 
+ Succulent=0.02)
+
+output_VWC_59_NU_23<-as.data.frame(result_59_NU_23@VWCBULK@Day)
+output_AET_59_NU_23<-as.data.frame(result_59_NU_23@AET@Day)
+Well_59_2023_NU<-subset(output_AET_59_NU_23, Year==2010 )
+
+#2022
+#Understory
+result_67_U_22 <- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata4, 
+ understory=TRUE,
+ understory_biomass = 87,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+output_VWC_67_U_22<-as.data.frame(result_67_U_22@VWCBULK@Day)
+output_AET_67_U_22<-as.data.frame(result_67_U_22@AET@Day)
+
+result_62_U_22<- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata3,
+  understory=TRUE,
+  understory_biomass = 135,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_U_22<-as.data.frame(result_62_U_22@VWCBULK@Day)
+output_AET_62_U_22<-as.data.frame(result_62_U_22@AET@Day)
+Well_62_2022_Understory<-subset(output_AET_62_U_22, Year==2010 )
+
+
+result_59_U_22<- run_sw_exec(
+  sand_frac = c(.625290116,.5534493101,.5453490698,.4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3=c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata2,
+  understory=TRUE,
+  understory_biomass=70,
+  Shrub=.30, 
+  Grass=.2, 
+  Bareground=.4, 
+  Forb1=.1, 
+  Forb2=.08, 
+  Succulent=0.02)
+
+output_VWC_59_U_22<-as.data.frame(result_59_U_22@VWCBULK@Day)
+output_AET_59_U_22<-as.data.frame(result_59_U_22@AET@Day)
+
+Well_59_2022_Understory<-subset(output_AET_59_U_22, Year==2010 )
+#No Understory
+result_67_NU_22<- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata4, 
+ understory=FALSE,
+ understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_67_NU_22<-as.data.frame(result_67_NU_22@VWCBULK@Day)
+output_AET_67_NU_22<-as.data.frame(result_67_NU_22@AET@Day)
+Well_67_2022_NU<-subset(output_AET_67_NU_22, Year==2010 )
+
+
+result_62_NU_22<- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata3,
+  understory=FALSE, 
+  understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_NU_22<-as.data.frame(result_62_NU_22@VWCBULK@Day)
+output_AET_62_NU_22<-as.data.frame(result_62_NU_22@AET@Day)
+Well_62_2022_NU<-subset(output_AET_62_NU_22, Year==2010 )
+
+
+result_59_NU_22<- run_sw_exec(
+  sand_frac = c(.625290116,.5534493101,.5453490698,.4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3=c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata2,
+  understory=FALSE,
+  understory_biomass = 0,
+  Shrub=.30, 
+  Grass=.2, 
+  Bareground=.4, 
+  Forb1=.1, 
+  Forb2=.08, 
+  Succulent=0.02)
+
+output_VWC_59_NU_22<-as.data.frame(result_59_NU_22@VWCBULK@Day)
+output_AET_59_NU_22<-as.data.frame(result_59_NU_22@AET@Day)
+Well_59_2022_NU<-subset(output_AET_59_NU_22, Year==2010 )
+
+
+
+###Water Addition
+#2023
+#Understory
+result_67_U_23_WA<- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata_WA23_67, 
+ understory=TRUE,
+ understory_biomass = 160,
+ Shrub=.3, 
+ Grass=.2, 
+ Bareground=.40, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0
+ )
+
+output_VWC_67_U_23_WA<-as.data.frame(result_67_U_23_WA@VWCBULK@Day)
+output_AET_67_U_23_WA<-as.data.frame(result_67_U_23_WA@AET@Day)
+Well_67_2023_Understory_WA<-subset(output_AET_67_U_23_WA, Year==2010 )
+
+
+
+result_62_U_23_WA <- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata_WA23_62,
+  understory=TRUE,
+  understory_biomass = 230,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_U_23_WA<-as.data.frame(result_62_U_23_WA@VWCBULK@Day)
+output_AET_62_U_23_WA<-as.data.frame(result_62_U_23_WA@AET@Day)
+Well_62_2023_Understory_WA<-subset(output_AET_62_U_23_WA, Year==2010 )
+
+
+result_59_U_23_WA <- run_sw_exec(
+  sand_frac = c(.625290116, .5534493101, .5453490698, .4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3=c(1.633969952,
+0.710720652,
+1.012121212,
+1.354265343,
+1.354265343,1.354265343,1.354265343,1.354265343),
+  wdata = wdata_WA23_59,
+  understory=TRUE,
+  understory_biomass = 150,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.08, 
+ Succulent=0.02)
+
+output_VWC_59_U_23_WA<-as.data.frame(result_59_U_23_WA@VWCBULK@Day)
+output_VWC_59_U_23_WA<-as.data.frame(result_59_U_23_WA@AET@Day)
+Well_59_2023_Understory_WA<-subset(output_VWC_59_U_23_WA, Year==2010 )
+#No Understory
+result_67_NU_23_WA <- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata_WA23_67, 
+ understory=FALSE,
+ understory_biomass = 0,
+ Shrub=.3, 
+ Grass=.2, 
+ Bareground=.40, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_67_NU_23_WA<-as.data.frame(result_67_NU_23_WA@VWCBULK@Day)
+output_AET_67_NU_23_WA<-as.data.frame(result_67_NU_23_WA@AET@Day)
+Well_67_2023_NU_WA<-subset(output_AET_67_NU_23_WA, Year==2010 )
+
+
+result_62_NU_23_WA <- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata_WA23_62,
+  understory=FALSE,
+  understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_NU_23_WA<-as.data.frame(result_62_NU_23_WA@VWCBULK@Day)
+output_VWC_62_NU_23_WA<-as.data.frame(result_62_NU_23_WA@AET@Day)
+Well_62_2023_NU_WA<-subset(output_VWC_62_NU_23_WA, Year==2010 )
+
+
+result_59_NU_23_WA <- run_sw_exec(
+  sand_frac = c(.625290116,.5534493101,.5453490698,.4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+ bulkDensity_g.cm.3=c(1.633969952,
+0.710720652,
+1.012121212,
+1.354265343,
+1.354265343,1.354265343,1.354265343,1.354265343),
+   wdata = wdata_WA23_59,
+  understory=FALSE,
+  understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.08, 
+ Succulent=0.02)
+
+output_VWC_59_NU_23_WA<-as.data.frame(result_59_NU_23_WA@VWCBULK@Day)
+output_AET_59_NU_23_WA<-as.data.frame(result_59_NU_23_WA@AET@Day)
+Well_59_2023_NU_WA<-subset(output_AET_59_NU_23_WA, Year==2010 )
+
+#2022
+#Understory
+result_67_U_22_WA <- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata_WA22_67, 
+ understory=TRUE,
+ understory_biomass = 120,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+output_VWC_67_U_22_WA<-as.data.frame(result_67_U_22_WA@VWCBULK@Day)
+output_AET_67_U_22_WA<-as.data.frame(result_67_U_22_WA@AET@Day)
+Well_67_2022_Understory_WA<-subset(output_AET_67_U_22_WA, Year==2010 )
+
+result_62_U_22_WA<- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata_WA22_62,
+  understory=TRUE,
+  understory_biomass = 220,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_U_22_WA<-as.data.frame(result_62_U_22_WA@VWCBULK@Day)
+output_AET_62_U_22_WA<-as.data.frame(result_62_U_22_WA@AET@Day)
+
+Well_62_2022_Understory_WA<-subset(output_AET_62_U_22_WA, Year==2010 )
+
+
+result_59_U_22_WA<- run_sw_exec(
+  sand_frac = c(.625290116,.5534493101,.5453490698,.4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3=c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata_WA22_59,
+  understory=TRUE,
+  understory_biomass=130,
+  Shrub=.30, 
+  Grass=.2, 
+  Bareground=.4, 
+  Forb1=.1, 
+  Forb2=.08, 
+  Succulent=0.02)
+
+output_VWC_59_U_22_WA<-as.data.frame(result_59_U_22_WA@VWCBULK@Day)
+output_AET_59_U_22_WA<-as.data.frame(result_59_U_22_WA@AET@Day)
+
+Well_59_2022_Understory_WA<-subset(output_AET_59_U_22_WA, Year==2010 )
+#No Understory
+result_67_NU_22_WA<- run_sw_exec(
+  sand_frac = c(.7114885115,.7326934613,.7718743749,.8449370881,.8449370881,.8449370881,.8449370881,.8449370881), 
+  clay_frac = c(.1679120879, .1666066787, .1881176235, .1421869383, .1421869383, .1421869383, .1421869383, .1421869383),
+  gravel_content = c(0.00, 0.00, 0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata_WA22_67, 
+ understory=FALSE,
+ understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.2, 
+ Bareground=.4, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_67_NU_22_WA<-as.data.frame(result_67_NU_22_WA@VWCBULK@Day)
+output_AET_67_NU_22_WA<-as.data.frame(result_67_NU_22_WA@AET@Day)
+
+
+result_62_NU_22_WA<- run_sw_exec(
+  sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554), 
+  clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277),
+  gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00),
+  bulkDensity_g.cm.3= c(2.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584),
+  wdata = wdata_WA22_62,
+  understory=FALSE, 
+  understory_biomass = 0,
+ Shrub=.30, 
+ Grass=.25, 
+ Bareground=.35, 
+ Forb1=.1, 
+ Forb2=.1, 
+ Succulent=0)
+
+output_VWC_62_NU_22_WA<-as.data.frame(result_62_NU_22_WA@VWCBULK@Day)
+output_AET_62_NU_22_WA<-as.data.frame(result_62_NU_22_WA@AET@Day)
+Well_62_2022_NU_WA<-subset(output_AET_62_NU_22_WA, Year==2010 )
+
+
+result_59_NU_22_WA<- run_sw_exec(
+  sand_frac = c(.625290116,.5534493101,.5453490698,.4724289716,.4724289716,.4724289716,.4724289716,.4724289716), 
+  clay_frac = c(.2139255702,.2865826835,.2924584917,.4253701481,.4253701481,.4253701481,.4253701481,.4253701481),
+  gravel_content = c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+  bulkDensity_g.cm.3=c(2.218894831,1.90236822,1.771886937,1.699363382,1.699363382,1.699363382,1.699363382,1.699363382),
+  wdata = wdata_WA22_59,
+  understory=FALSE,
+  understory_biomass = 0,
+  Shrub=.30, 
+  Grass=.2, 
+  Bareground=.4, 
+  Forb1=.1, 
+  Forb2=.08, 
+  Succulent=0.02)
+
+output_VWC_59_NU_22_WA<-as.data.frame(result_59_NU_22_WA@VWCBULK@Day)
+output_AET_59_NU_22_WA<-as.data.frame(result_59_NU_22_WA@AET@Day)
+Well_59_2022_NU_WA<-subset(output_AET_59_NU_22_WA, Year==2010 )
+
+
+#Transpiration
+
+#2023 Understory
+output_Trans_67_U_23<-as.data.frame(result_67_U_23@TRANSP@Day)
+Well_67_2023_U_Trans<-subset(output_Trans_67_U_23, Year==2010 )
+
+output_Trans_62_U_23<-as.data.frame(result_62_U_23@TRANSP@Day)
+Well_62_2023_U_Trans<-subset(output_Trans_62_U_23, Year==2010 )
+
+output_Trans_59_U_23<-as.data.frame(result_59_U_23@TRANSP@Day)
+Well_59_2023_U_Trans<-subset(output_Trans_59_U_23, Year==2010 )
+#2022 Understory
+output_Trans_67_U_22<-as.data.frame(result_67_U_22@TRANSP@Day)
+Well_67_2022_U_Trans<-subset(output_Trans_67_U_22, Year==2010 )
+
+output_Trans_62_U_22<-as.data.frame(result_62_U_22@TRANSP@Day)
+Well_62_2022_U_Trans<-subset(output_Trans_62_U_22, Year==2010 )
+
+output_Trans_59_U_22<-as.data.frame(result_59_U_22@TRANSP@Day)
+Well_59_2022_U_Trans<-subset(output_Trans_59_U_22, Year==2010 )
+
+
+#2023 NO Understory
+output_Trans_67_NU_23<-as.data.frame(result_67_NU_23@TRANSP@Day)
+Well_67_2023_NU_Trans<-subset(output_Trans_67_NU_23, Year==2010 )
+
+output_Trans_62_NU_23<-as.data.frame(result_62_NU_23@TRANSP@Day)
+Well_62_2023_NU_Trans<-subset(output_Trans_62_NU_23, Year==2010 )
+
+output_Trans_59_NU_23<-as.data.frame(result_59_NU_23@TRANSP@Day)
+Well_59_2023_NU_Trans<-subset(output_Trans_59_NU_23, Year==2010 )
+#2022 Understory
+output_Trans_67_NU_22<-as.data.frame(result_67_NU_22@TRANSP@Day)
+Well_67_2022_NU_Trans<-subset(output_Trans_67_NU_22, Year==2010 )
+
+output_Trans_62_NU_22<-as.data.frame(result_62_NU_22@TRANSP@Day)
+Well_62_2022_NU_Trans<-subset(output_Trans_62_NU_22, Year==2010 )
+
+output_Trans_59_NU_22<-as.data.frame(result_59_NU_22@TRANSP@Day)
+Well_59_2022_NU_Trans<-subset(output_Trans_59_NU_22, Year==2010 )
+
+#Water Addition
+#2023 Understory
+output_Trans_67_U_23_WA<-as.data.frame(result_67_U_23_WA@TRANSP@Day)
+Well_67_2023_U_Trans_WA<-subset(output_Trans_67_U_23_WA, Year==2010 )
+
+output_Trans_62_U_23_WA<-as.data.frame(result_62_U_23_WA@TRANSP@Day)
+Well_62_2023_U_Trans_WA<-subset(output_Trans_62_U_23_WA, Year==2010 )
+
+output_Trans_59_U_23_WA<-as.data.frame(result_59_U_23_WA@TRANSP@Day)
+Well_59_2023_U_Trans_WA<-subset(output_Trans_59_U_23_WA, Year==2010 )
+#2022 Understory
+output_Trans_67_U_22_WA<-as.data.frame(result_67_U_22_WA@TRANSP@Day)
+Well_67_2022_U_Trans_WA<-subset(output_Trans_67_U_22_WA, Year==2010 )
+
+output_Trans_62_U_22_WA<-as.data.frame(result_62_U_22_WA@TRANSP@Day)
+Well_62_2022_U_Trans_WA<-subset(output_Trans_62_U_22_WA, Year==2010 )
+
+output_Trans_59_U_22_WA<-as.data.frame(result_59_U_22_WA@TRANSP@Day)
+Well_59_2022_U_Trans_WA<-subset(output_Trans_59_U_22_WA, Year==2010 )
+
+
+#2023 NO Understory
+output_Trans_67_NU_23_WA<-as.data.frame(result_67_NU_23_WA@TRANSP@Day)
+Well_67_2023_NU_Trans_WA<-subset(output_Trans_67_NU_23_WA, Year==2010 )
+
+output_Trans_62_NU_23_WA<-as.data.frame(result_62_NU_23_WA@TRANSP@Day)
+Well_62_2023_NU_Trans_WA<-subset(output_Trans_62_NU_23_WA, Year==2010 )
+
+output_Trans_59_NU_23_WA<-as.data.frame(result_59_NU_23_WA@TRANSP@Day)
+Well_59_2023_NU_Trans_WA<-subset(output_Trans_59_NU_23_WA, Year==2010 )
+#2022 Understory
+output_Trans_67_NU_22_WA<-as.data.frame(result_67_NU_22_WA@TRANSP@Day)
+Well_67_2022_NU_Trans_WA<-subset(output_Trans_67_NU_22_WA, Year==2010 )
+
+output_Trans_62_NU_22_WA<-as.data.frame(result_62_NU_22_WA@TRANSP@Day)
+Well_62_2022_NU_Trans_WA<-subset(output_Trans_62_NU_22_WA, Year==2010 )
+
+output_Trans_59_NU_22_WA<-as.data.frame(result_59_NU_22_WA@TRANSP@Day)
+Well_59_2022_NU_Trans_WA<-subset(output_Trans_59_NU_22_WA, Year==2010 )
+```
+Transpiration numbers
+```{r}
+
+calculate_transpiration <- function(df1, df2, start_Day, end_Day) {
+  # Step 1: Filter rows for the specified time frame in both data frames
+  df1_filtered <- df1[df1$Day >= start_Day & df1$Day <= end_Day, ]
+  df2_filtered <- df2[df2$Day >= start_Day & df2$Day <= end_Day, ]
+  
+shrub_columns_1 <- df1_filtered[, grep("shrub", names(df1_filtered))]
+grass_columns_1 <- df1_filtered[, grep("grass", names(df1_filtered))]
+forb_columns_1 <- df1_filtered[, grep("forb", names(df1_filtered))]
+total_columns_1 <- df1_filtered[, grep("total", names(df1_filtered))]
+
+shrub_columns_2 <- df2_filtered[, grep("shrub", names(df2_filtered))]
+grass_columns_2 <- df2_filtered[, grep("grass", names(df2_filtered))]
+forb_columns_2 <- df2_filtered[, grep("forb", names(df2_filtered))]
+total_columns_2 <- df2_filtered[, grep("total", names(df2_filtered))]
+
+  # Step 2: Calculate the total AET for each data frame
+  Shrub_trans_1 <- data.frame(
+    Transpiration_mm = sum(colSums(shrub_columns_1))*10,
+    Understory = "Yes",
+    Type = "Shrub",
+    Source="SOILWAT2"
+  )
+
+  Shrub_trans_2 <- data.frame(
+    Transpiration_mm = sum(colSums(shrub_columns_2))*10,
+    Understory = "No",
+    Type = "Shrub",
+    Source="SOILWAT2"
+  )
+
+  Grass_trans_1 <- data.frame(
+    Transpiration_mm = sum(colSums(grass_columns_1))*10,
+    Understory = "Yes",
+    Type = "Grass",
+    Source="SOILWAT2"
+  )
+  Grass_trans_2 <- data.frame(
+    Transpiration_mm = sum(colSums(grass_columns_2))*10,
+    Understory = "No",
+    Type = "Grass",
+    Source="SOILWAT2"
+  )
+  Forb_trans_1 <- data.frame(
+    Transpiration_mm = sum(colSums(forb_columns_1))*10,
+    Understory = "Yes",
+    Type = "Forb",
+    Source="SOILWAT2"
+  )
+  
+  Forb_trans_2 <- data.frame(
+    Transpiration_mm = sum(colSums(forb_columns_2))*10,
+    Understory = "No",
+    Type = "Forb",
+    Source="SOILWAT2"
+  )
+  
+total_trans_1 <- data.frame(
+    Transpiration_mm = sum(colSums(total_columns_1))*10,
+    Understory = "Yes",
+    Type = "Total Transpiration",
+    Source="SOILWAT2"
+  )
+ total_trans_2 <- data.frame(
+    Transpiration_mm = sum(colSums(total_columns_2))*10,
+    Understory = "No",
+    Type = "Total Transpiration",
+    Source="SOILWAT2"
+  )
+  # Step 3: Combine the calculated data frames into the 'results' dataframe
+  results <- rbind(Shrub_trans_1, Shrub_trans_2, Grass_trans_1, Grass_trans_2, Forb_trans_1,Forb_trans_2,total_trans_1,total_trans_2 )
+
+  # Reset row names in the result dataframe
+  rownames(results) <- NULL
+
+  return(results)
+}
+
+
+#67 
+Transp_67_22 <- calculate_transpiration(Well_67_2022_U_Trans, Well_67_2022_NU_Trans, start_Day = 149, end_Day = 218)
+Transp_67_22$Well<-rep(67)
+Transp_67_22$Year<-rep("2022")
+Transp_67_23 <- calculate_transpiration(Well_67_2023_U_Trans, Well_67_2023_NU_Trans, start_Day = 149, end_Day = 218)
+Transp_67_23$Well<-rep(67)
+Transp_67_23$Year<-rep("2023")
+
+#62 
+Transp_62_22 <- calculate_transpiration(Well_62_2022_U_Trans, Well_62_2022_NU_Trans, start_Day = 149, end_Day = 218)
+Transp_62_22$Well<-rep(62)
+Transp_62_22$Year<-rep("2022")
+Transp_62_23 <- calculate_transpiration(Well_62_2023_U_Trans, Well_62_2023_NU_Trans, start_Day = 149, end_Day = 218)
+Transp_62_23$Well<-rep(62)
+Transp_62_23$Year<-rep("2023")
+
+#59
+Transp_59_22 <- calculate_transpiration(Well_59_2022_U_Trans, Well_59_2022_NU_Trans, start_Day = 149, end_Day = 218)
+Transp_59_22$Well<-rep(59)
+Transp_59_22$Year<-rep("2022")
+Transp_59_23 <- calculate_transpiration(Well_59_2023_U_Trans, Well_59_2023_NU_Trans, start_Day = 149, end_Day = 218)
+Transp_59_23$Well<-rep(59)
+Transp_59_23$Year<-rep("2023")
+
+
+Transp_sum_22<-rbind(Transp_59_22,Transp_62_22,Transp_67_22)
+Transp_sum_23<-rbind(Transp_59_23,Transp_62_23,Transp_67_23)
+Transp_sum<-rbind(Transp_sum_23,Transp_sum_22)
+
+
+#67 
+Transp_67_22_WA <- calculate_transpiration(Well_67_2022_U_Trans_WA, Well_67_2022_NU_Trans_WA, start_Day = 149, end_Day = 218)
+Transp_67_22_WA$Well<-rep(67)
+Transp_67_22_WA$Year<-rep("2022")
+Transp_67_23_WA <- calculate_transpiration(Well_67_2023_U_Trans_WA, Well_67_2023_NU_Trans_WA, start_Day = 149, end_Day = 218)
+Transp_67_23_WA$Well<-rep(67)
+Transp_67_23_WA$Year<-rep("2023")
+
+#62 
+Transp_62_22_WA <- calculate_transpiration(Well_62_2022_U_Trans_WA, Well_62_2022_NU_Trans_WA, start_Day = 149, end_Day = 218)
+Transp_62_22_WA$Well<-rep(62)
+Transp_62_22_WA$Year<-rep("2022")
+Transp_62_23_WA <- calculate_transpiration(Well_62_2023_U_Trans_WA, Well_62_2023_NU_Trans_WA, start_Day = 149, end_Day = 218)
+Transp_62_23_WA$Well<-rep(62)
+Transp_62_23_WA$Year<-rep("2023")
+
+#59
+Transp_59_22_WA <- calculate_transpiration(Well_59_2022_U_Trans_WA, Well_59_2022_NU_Trans_WA, start_Day = 149, end_Day = 218)
+Transp_59_22_WA$Well<-rep(59)
+Transp_59_22_WA$Year<-rep("2022")
+Transp_59_23_WA <- calculate_transpiration(Well_59_2023_U_Trans_WA, Well_59_2023_NU_Trans_WA, start_Day = 149, end_Day = 218)
+Transp_59_23_WA$Well<-rep(59)
+Transp_59_23_WA$Year<-rep("2023")
+
+Transp_sum_22_WA<-rbind(Transp_59_22_WA,Transp_62_22_WA,Transp_67_22_WA)
+Transp_sum_23_WA<-rbind(Transp_59_23_WA,Transp_62_23_WA,Transp_67_23_WA)
+Transp_sum_WA<-rbind(Transp_sum_23_WA,Transp_sum_22_WA)
+Transp_sum_WA$Water_Addition<-rep("Water Addition")
+Transp_sum_22<-rbind(Transp_59_22,Transp_62_22,Transp_67_22)
+Transp_sum_23<-rbind(Transp_59_23,Transp_62_23,Transp_67_23)
+Transp_sum<-rbind(Transp_sum_23,Transp_sum_22)
+Transp_sum$Water_Addition<-rep("Control")
+
+Transp_total<-rbind(Transp_sum,Transp_sum_WA)
+
+write.csv(Transp_total, "C:/Users/walnu/Desktop/Transpiration_Proportions.csv")
+
+
+library(ggpattern)
+library(viridis)
+library(hrbrthemes)
+Transp_total$Well<-as.factor(Transp_total$Well)
+Transp_total<-subset(Transp_total, Type!="Total Transpiration")
+# Reorder factor levels to group bars by Well
+Transp_total$Well <- factor(Transp_total$Well, levels = unique(Transp_total$Well))
+Transp_total <- Transp_total[order(Transp_total$Well), ]
+
+new_labels <- c("59 No Understory", "62 No Understory", "67 No Understory", "59 With Understory", "62 With Understory", "67 With Understory")  # Define labels for all levels
+
+# Plotting
+transpiration <- ggplot(Transp_total, aes(fill = Type, y = Transpiration_mm, x = interaction(Well, Understory), pattern = Understory)) + 
+  geom_bar(position = position_dodge(), stat = "identity") +
+  scale_fill_manual(values = colorRampPalette(c("lightblue", "white"))(4)) +
+  scale_pattern_manual(values = c("No" = "stripe", "Yes" = "none")) +
+  geom_bar_pattern(stat = "identity",
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.05,
+                   pattern_spacing = 0.1,
+                   pattern_key_scale_factor = 0.2) +
+  theme_minimal() +
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 12, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 12, angle = 45, hjust = 1,face = "bold"),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size = 14),
+        plot.subtitle = element_text(size = 12),
+        strip.text = element_text(size = 10),
+        legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) + 
+  facet_wrap(Year~Water_Addition , labeller = labeller(c("Evaporation" = "Cumulative Evaporation (mm)", "Transpiration" = "Cumulative Transpiration (mm)")))+
+  labs(x = "Well ID", y = "Transpiration (mm)") + scale_x_discrete(labels = new_labels)+ 
+  labs(x = "Well ID and Treatment", y = "Transpiration (mm)") +
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                 title = "Understory Species Present?"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                              title = "Plant Functional Type"))
+
+Transp_total$Water_Addition<-as.factor(Transp_total$Water_Addition)
+ transpiration
+ggplot2::ggsave("C:/Users/walnu/Desktop/Trans_Plant_Type.png", transpiration, width = 15, height = 14)
+
+
+###Transpiration table
+Transp_sum
+```
+SOILWAT VWC plots
+```{r}
+  Well_67_2022_Understory$Source<-rep("With_Understory")
+  Well_67_2022_NU$Source<-rep("No_Understory")
+  Well_67_2022<-rbind(Well_67_2022_Understory,Well_67_2022_NU)
+  Precip_67_2022 <- aggregate(mm.Precipitation ~ Timestamps, LMG_67A, sum)
+  Precip_67_2022$Day<-yday(Precip_67_2022$Timestamps)
+  Well_67_2022<-merge(Well_67_2022,Precip_67_2022, by="Day")
+  Well_67_2022<-subset(Precip_67_2022, Day>121 & Day< 212)
+
+ggplot(Well_67_2022) +
+  geom_line(aes(x = Day,y = Lyr_2, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 67 2022 10 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+
+  
+ggplot(Well_67_2022) +
+  geom_line(aes(x = Day,y = Lyr_5, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 67 2022 40 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+  
+  
+  
+  Well_62_2022_NU$Source<-rep("No_Understory")
+  Well_62_2022_Understory$Source<-rep("With_Understory")
+  Well_62_2022<-rbind(Well_62_2022_NU,Well_62_2022_Understory)
+  Precip_62_2022 <- aggregate(mm.Precipitation ~ Timestamps, LMG_62A, sum)
+  Precip_62_2022$Day<-yday(Precip_62_2022$Timestamps)
+  Well_62_2022<-merge(Well_62_2022,Precip_62_2022, by="Day")
+  Well_62_2022<-subset(Well_62_2022, Day>121 & Day< 212) 
+  
+ggplot(Well_62_2022) +
+  geom_line(aes(x = Day,y = Lyr_2, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 62 2022 10 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+ ggplot(Well_62_2022) +
+  geom_line(aes(x = Day,y = Lyr_5, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 62 2022 40 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+ 
+  
+  
+  Well_59_2022_Understory$Source<-rep("With_Understory")
+  Well_59_2022_NU$Source<-rep("No_Understory")
+  Well_59_2022<-rbind(Well_59_2022_NU,Well_59_2022_Understory)
+  Precip_59_2022 <- aggregate(mm.Precipitation ~ Timestamps, LMG_59A, sum)
+  Precip_59_2022$Day<-yday(Precip_59_2022$Timestamps)
+  Well_59_2022<-merge(Well_59_2022,Precip_59_2022, by="Day")
+  Well_59_2022<-subset(Well_59_2022, Day>121 & Day< 212)  
+  
+ggplot(Well_59_2022) +
+  geom_line(aes(x = Day,y = Lyr_2, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 59 2022 10 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+ggplot(Well_59_2022) +
+  geom_line(aes(x = Day,y = Lyr_5, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 59 2022 40 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+  
+  
+  Well_67_2023_Understory$Source<-rep("With_Understory")
+  Well_67_2023_NU$Source<-rep("No_Understory")
+  Well_67_2023<-rbind(Well_67_2023_Understory,Well_67_2023_NU)
+  Precip_67_2023 <- aggregate(mm.Precipitation ~ Timestamps, LMG_67A_23, sum)
+  Precip_67_2023$Day<-yday(Precip_67_2023$Timestamps)
+  Well_67_2023<-merge(Well_67_2023,Precip_67_2023, by="Day")
+  Well_67_2023<-subset(Precip_67_2023, Day>121 & Day< 212)   
+
+  ggplot(Well_67_2023) +
+  geom_line(aes(x = Day,y = Lyr_2, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 67 2023 10 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+ggplot(Well_67_2023) +
+  geom_line(aes(x = Day,y = Lyr_5, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 67 2023 40 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+  
+  Well_62_2023_NU$Source<-rep("No_Understory")
+  Well_62_2023_Understory$Source<-rep("With_Understory")
+  Well_62_2023<-rbind(Well_62_2023_NU,Well_62_2023_Understory)
+  Precip_62_2023 <- aggregate(mm.Precipitation ~ Timestamps, LMG_62A_23, sum)
+  Precip_62_2023$Day<-yday(Precip_62_2023$Timestamps)
+  Well_62_2023<-merge(Well_62_2023,Precip_62_2023, by="Day")
+  Well_62_2023<-subset(Well_62_2023, Day>121 & Day< 212)   
+   
+ggplot(Well_62_2023) +
+  geom_line(aes(x = Day,y = Lyr_2, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 62 2023 10 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+ggplot(Well_62_2023) +
+  geom_line(aes(x = Day,y = Lyr_5, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = mm.Precipitation/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 62 2023 40 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+
+  
+  Well_59_2023_Understory$Source<-rep("With_Understory")
+  Well_59_2023_NU$Source<-rep("No_Understory")
+  Well_59_2023<-rbind(Well_59_2023_Understory,Well_59_2023_NU)
+  Big_Piney_2023$Day<-Big_Piney_2023$DOY
+  Well_59_2023<-merge(Well_59_2023,Big_Piney_2023, by="Day")
+  Well_59_2023<-subset(Well_59_2023, Day>121 & Day< 212)   
+   
+ggplot(Well_59_2023) +
+  geom_line(aes(x = Day, y = Lyr_2, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = Precip_mm/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 59 2023 10 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+  
+ggplot(Well_59_2023) +
+  geom_line(aes(x = Day,y = Lyr_5, color = Source), size = 1.5) +
+  geom_bar(aes(x = Day,y = Precip_mm/100), stat = "identity", fill = "blue", alpha = 0.5) +
+  labs(title = "Daily VWC Well 59 2023 40 cm",
+       x = "Day",
+       y = "Values") +
+  scale_color_manual(values = c("With_Understory" = "red", "No_Understory" = "steelblue")) +
+  theme_minimal()+
+    scale_y_continuous(sec.axis = sec_axis(~.*50, name = "Precipitation (mm)"))
+ 
+```
+New Visuals Prep for cumulative
+```{r}
+calculate_AET_difference <- function(df1, df2, start_Day, end_Day) {
+  # Step 1: Filter rows for the specified time frame in both data frames
+  df1_filtered <- df1[df1$Day >= start_Day & df1$Day <= end_Day, ]
+  df2_filtered <- df2[df2$Day >= start_Day & df2$Day <= end_Day, ]
+
+  # Step 2: Calculate the total AET for each data frame
+  total_tran_df1 <- data.frame(
+    mm = sum(df1_filtered$tran_cm),
+    Understory = "Yes",
+    Type = "Transpiration",
+    Source="SOILWAT2"
+  )
+
+  total_tran_df2 <- data.frame(
+    mm = sum(df2_filtered$tran_cm),
+    Understory = "No",
+    Type = "Transpiration",
+    Source="SOILWAT2"
+  )
+
+  total_evap_df1 <- data.frame(
+    mm = sum(df1_filtered$evapotr_cm) - sum(df1_filtered$tran_cm),
+    Understory = "Yes",
+    Type = "Evaporation",
+    Source="SOILWAT2"
+  )
+total_bevap_df1 <- data.frame(
+    mm = sum(df1_filtered$esoil_cm),
+    Understory = "Yes",
+    Type = "Bare_soil_evap",
+    Source="SOILWAT2"
+  )
+  total_evap_df2 <- data.frame(
+    mm = sum(df2_filtered$evapotr_cm) - sum(df2_filtered$tran_cm),
+    Understory = "No",
+    Type = "Evaporation",
+    Source="SOILWAT2"
+  )
+  
+  total_bevap_df2 <- data.frame(
+    mm = sum(df2_filtered$esoil_cm),
+    Understory = "No",
+    Type = "Bare_soil_evap",
+    Source="SOILWAT2"
+  )
+total_AET_df2 <- data.frame(
+    mm = sum(df2_filtered$evapotr_cm) - sum(df2_filtered$tran_cm),
+    Understory = "No",
+    Type = "Evaporation",
+    Source="SOILWAT2"
+  )
+ total_AET_df1 <- data.frame(
+    mm = sum(df1_filtered$evapotr_cm),
+    Understory = "Yes",
+    Type = "AET",
+    Source="SOILWAT2"
+  )
+total_AET_df2 <- data.frame(
+    mm = sum(df2_filtered$evapotr_cm),
+    Understory = "No",
+    Type = "AET",
+    Source="SOILWAT2"
+  )
+
+  # Step 3: Combine the calculated data frames into the 'results' dataframe
+  results <- rbind(total_tran_df1, total_tran_df2, total_evap_df1, total_evap_df2, total_AET_df1,total_AET_df2,total_bevap_df2,total_bevap_df1 )
+
+  # Reset row names in the result dataframe
+  rownames(results) <- NULL
+
+  return(results)
+}
+
+#67 
+SOILWAT2_67_22 <- calculate_AET_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 218)
+SOILWAT2_67_22$Well<-rep(67)
+SOILWAT2_67_23 <- calculate_AET_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 218)
+SOILWAT2_67_23$Well<-rep(67)
+#62 
+SOILWAT2_62_22 <- calculate_AET_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 218)
+SOILWAT2_62_22$Well<-rep(62)
+SOILWAT2_62_23 <- calculate_AET_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 218)
+SOILWAT2_62_23$Well<-rep(62)
+#59
+SOILWAT2_59_22 <- calculate_AET_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 218)
+SOILWAT2_59_22$Well<-rep(59)
+SOILWAT2_59_23 <- calculate_AET_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 218)
+SOILWAT2_59_23$Well<-rep(59)
+
+##Water Additions
+
+#67 
+SOILWAT2_67_22_WA <- calculate_AET_difference(Well_67_2022_Understory_WA, Well_67_2022_NU_WA, start_Day = 149, end_Day = 218)
+SOILWAT2_67_22_WA$Well<-rep(67)
+SOILWAT2_67_23_WA <- calculate_AET_difference(Well_67_2023_Understory_WA, Well_67_2023_NU_WA, start_Day = 149, end_Day = 218)
+SOILWAT2_67_23_WA$Well<-rep(67)
+#62 
+SOILWAT2_62_22_WA <- calculate_AET_difference(Well_62_2022_Understory_WA, Well_62_2022_NU_WA, start_Day = 149, end_Day = 218)
+SOILWAT2_62_22_WA$Well<-rep(62)
+SOILWAT2_62_23_WA <- calculate_AET_difference(Well_62_2023_Understory_WA, Well_62_2023_NU_WA, start_Day = 149, end_Day = 218)
+SOILWAT2_62_23_WA$Well<-rep(62)
+#59
+SOILWAT2_59_22_WA <- calculate_AET_difference(Well_59_2022_Understory_WA, Well_59_2022_NU_WA, start_Day = 149, end_Day = 218)
+SOILWAT2_59_22_WA$Well<-rep(59)
+SOILWAT2_59_23_WA <- calculate_AET_difference(Well_59_2023_Understory_WA, Well_59_2023_NU_WA, start_Day = 149, end_Day = 218)
+SOILWAT2_59_23_WA$Well<-rep(59)
+
+
+SOILWAT_sum_22<-rbind(SOILWAT2_59_22,SOILWAT2_62_22,SOILWAT2_67_22)
+SOILWAT_sum_23<-rbind(SOILWAT2_59_23,SOILWAT2_62_23,SOILWAT2_67_23)
+SOILWAT_sum<-rbind(SOILWAT_sum_23,SOILWAT_sum_22)
+
+SOILWAT_sum_22_WA<-rbind(SOILWAT2_59_22_WA,SOILWAT2_62_22_WA,SOILWAT2_67_22_WA)
+SOILWAT_sum_23_WA<-rbind(SOILWAT2_59_23_WA,SOILWAT2_62_23_WA,SOILWAT2_67_23_WA)
+SOILWAT_sum_WA<-rbind(SOILWAT_sum_23_WA,SOILWAT_sum_22_WA)
+
+
+calculate_fAET_difference <- function(df1,df2, start_Day, end_Day) {
+  # Step 1: Filter rows for the specified time frame in both data frames
+  df1_filtered <- df1[df1$Interval_7Day >= start_Day & df1$Interval_7Day <= end_Day, ]
+  total_AET_df1<-abs(sum(df1_filtered$Water_Balance))
+  df2_filtered <- df2[df2$Interval_7Day >= start_Day & df2$Interval_7Day <= end_Day, ]
+  total_AET_df2<-abs(sum(df2_filtered$Water_Balance))
+  # Create a new data frame to store the result
+  result_df1 <- data.frame(
+    mm = abs(sum(df1_filtered$Water_Balance)),
+    Understory = "Yes",
+    Type = "AET",
+    Source="Feild"
+  )
+  result_df2 <- data.frame(
+    mm = abs(sum(df2_filtered$Water_Balance)),
+    Understory = "No",
+    Type = "AET",
+    Source="Feild"
+  )
+  
+  result_df<-rbind(result_df1,result_df2)
+  return(result_df)
+}
+#Filling in missing data
+Filpah<-"C:/Users/walnu/Desktop"
+Control_67B_NU_weather_W_7<- read.csv(file.path(Filpah,"Control_67B_NU_weather_W_7.csv"))
+Control_67B_NU_weather_NW_7<- read.csv(file.path(Filpah,"Control_67B_NU_weather_NW_7.csv"))
+Control_67B_NU_weather_NW_23_7<- read.csv(file.path(Filpah,"Control_67B_NU_weather_NW_23_7.csv"))
+Control_67B_NU_weather_W_23_7<- read.csv(file.path(Filpah,"Control_67B_NU_weather_W_23_7.csv"))
+
+#67 
+Field_67_22 <- calculate_fAET_difference(Control_67A_U_weather_NW_7, Control_67B_NU_weather_NW_7, start_Day = 23, end_Day = 32)
+Field_67_22$Well<-rep(67)
+Field_67_23 <- calculate_fAET_difference(Control_67A_U_weather_NW_23_7, Control_67B_NU_weather_NW_23_7, start_Day = 23, end_Day = 32)
+Field_67_23$Well<-rep(67)
+#62 
+Field_62_22 <- calculate_fAET_difference(Control_62A_U_weather_NW_7, Control_62B_NU_weather_NW_7, start_Day = 23, end_Day = 32)
+Field_62_22$Well<-rep(62)
+Field_62_23 <- calculate_fAET_difference(Control_62A_U_weather_NW_23_7, Control_62B_NU_weather_NW_23_7, start_Day = 23, end_Day = 32)
+Field_62_23$Well<-rep(62)
+#59
+Field_59_22 <- calculate_fAET_difference(Control_59A_U_weather_NW_7, Control_59B_NU_weather_NW_7, start_Day = 23, end_Day = 32)
+Field_59_22$Well<-rep(59)
+Field_59_23 <- calculate_fAET_difference(Control_59A_U_weather_NW_23_7, Control_59B_NU_weather_NW_23_7, start_Day = 23, end_Day = 32)
+Field_59_23$Well<-rep(59)
+
+
+
+Field_22<-rbind(Field_67_22,Field_62_22,Field_59_22)
+Field_23<-rbind(Field_67_23,Field_62_23,Field_59_23)
+
+##Water Additions
+
+
+#67 
+Field_67_22_WA <- calculate_fAET_difference(Control_67A_U_weather_W_7, Control_67B_NU_weather_W_7, start_Day = 23, end_Day = 33)
+Field_67_22_WA$Well<-rep(67)
+Field_67_23_WA <- calculate_fAET_difference(Control_67A_U_weather_W_23_7, Control_67B_NU_weather_W_23_7, start_Day = 23, end_Day = 32)
+Field_67_23_WA$Well<-rep(67)
+#62 
+Field_62_22_WA <- calculate_fAET_difference(Control_62A_U_weather_W_7, Control_62B_NU_weather_W_7, start_Day = 23, end_Day = 32)
+Field_62_22_WA$Well<-rep(62)
+Field_62_23_WA <- calculate_fAET_difference(Control_62A_U_weather_W_23_7, Control_62B_NU_weather_W_23_7, start_Day = 23, end_Day = 32)
+Field_62_23_WA$Well<-rep(62)
+#59
+Field_59_22_WA <- calculate_fAET_difference(Control_59A_U_weather_W_7, Control_59B_NU_weather_W_7, start_Day = 23, end_Day = 32)
+Field_59_22_WA$Well<-rep(59)
+Field_59_23_WA <- calculate_fAET_difference(Control_59A_U_weather_W_23_7, Control_59B_NU_weather_W_23_7, start_Day = 23, end_Day = 32)
+Field_59_23_WA$Well<-rep(59)
+
+
+Field_22_WA<-rbind(Field_67_22_WA,Field_62_22_WA,Field_59_22_WA)
+Field_23_WA<-rbind(Field_67_23_WA,Field_62_23_WA,Field_59_23_WA)
+
+
+write.csv(Control_67B_NU_weather_W_23_7, file = "C:/Users/walnu/Desktop/Control_67B_NU_weather_W_23_7_2.csv",  row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+
+SOILWAT_AET_23<-subset(SOILWAT_sum_23,Type=="AET")
+SOILWAT_AET_23<- SOILWAT_AET_23[,c("mm","Understory", "Well")] 
+SOILWAT_AET_23$Source<-rep("SOILWAT2")
+AET_23<-aov(mm~Understory+Texture_ratio, data = SOILWAT_AET_23)
+summary(AET_23)
+
+SOILWAT_AET_23$mm<-SOILWAT_AET_23$mm*10
+Field_22
+SW23<-rbind(SOILWAT_AET_23[,c("mm", "Understory", "Well", "Source")],Field_23[,c("mm", "Understory", "Well", "Source")])
+
+SW23$Well<-as.factor(SW23$Well)
+ggplot(SW23, aes(x = Well, y = mm, fill = interaction(Source, Understory))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Well Number", y = "Cumulative AET (mm)", fill = "Source & Presence of Understory") +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 26),  # Adjust font size for axis labels
+        axis.title = element_text(size = 24)) +  # A)djust font size for axis titles
+  coord_cartesian(ylim = c(0, 140)) +  # Set y-axis limits
+  scale_y_continuous(breaks = seq(0, 140, by = 20))
+
+
+write.csv(SOILWAT_sum, file = "C:/Users/walnu/Desktop/Bare_soil_Total_evap.csv",  row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+filtered_df <- SOILWAT_sum_22 %>% 
+  filter(!Type %in% c("Transpiration", "AET"))
+
+df_filtered <- filtered_df %>% 
+  filter(Type %in% c("Evaporation", "Bare_soil_evap"))
+
+df_summarized <- df_filtered %>%
+  group_by(Understory, Well, Type) %>%
+  summarise(mm = mean(mm), .groups = 'drop') # Taking the average; adjust this as necessary
+
+
+# Step 2: Spread the data to wide format so each type A and B are in separate columns
+df_wide <- df_summarized %>%
+  pivot_wider(names_from = Type, values_from = mm)
+# Step 3: Calculate the subtraction (A - B) for each understory and well combination
+# Assuming the result of spread gives you 'A' and 'B' columns for the mm values
+df_wide <- df_wide %>%
+  mutate(Rest_of_total_Evaporation = Evaporation - Bare_soil_evap) # This creates a new column with the result of A - B
+
+# Step 4: (Optional) Select relevant columns to view the result
+result <- df_wide %>%
+  select(Understory, Well, Rest_of_total_Evaporation, Bare_soil_evap)
+
+library(viridis)
+library(hrbrthemes)
+SOILWAT_sum$Well<-as.factor(SOILWAT_sum$Well)
+ggplot(filtered_df, aes(fill=Type, y=mm, x=interaction(Well, Understory))) + 
+    geom_bar(position="stack", stat="identity")+
+    scale_fill_viridis(discrete = T) +
+    ggtitle("Studying 4 species..") +
+    theme_ipsum() +
+    xlab("")
+
+df_long <- pivot_longer(result, 
+                        cols = c(Rest_of_total_Evaporation, Bare_soil_evap), 
+                        names_to = "Type", 
+                        values_to = "Value")
+
+
+df_long$mm<-df_long$Value*10
+
+# Now, create a stacked bar plot
+ggplot(df_long, aes(x = interaction(Understory, Well), y = mm, fill = fct_rev(Type))) +  # Reversing the order of fill aesthetic
+  geom_bar(stat = "identity", position = "stack") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + # Improve x-axis labels readability
+  labs(x = "Presence of Understory (Y/N) and Well", y = "mm", fill = "Component of Evaporation") +
+  ggtitle("Stacked Bar Plot of Evaporation components by Understory and Well 2022")
+ 
+```
+Texture Stats
+```{r}
+calculate_Understory_T_difference <- function(Data_1, Data_2, start_Day, end_Day,Texture, Precip) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","evapotr_cm")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","evapotr_cm")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+
+  # Calculate differences
+  # Calculate differences
+  diff <- data.frame(Transpiration_Diff=c(data_1_subset$tran_cm-data_2_subset$tran_cm),Day = data_1_subset$Day, Texture_ratio=rep(Texture)  , Precip=rep(Precip))
+  diff$Day <- as.factor(diff$Day)
+diff$Texture <- as.numeric(diff$Texture)
+diff$Precip <- as.numeric(diff$Precip)
+  return(diff)
+}
+
+calculate_Understory_E_difference <- function(Data_1, Data_2, start_Day, end_Day, Texture, Precip) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","evapotr_cm")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","evapotr_cm")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+data_1_subset$evap<-data_1_subset$evapotr_cm-data_1_subset$tran_cm
+data_2_subset$evap<-data_2_subset$evapotr_cm-data_2_subset$tran_cm
+
+  # Calculate differences
+  diff <- data.frame(Evaporation_Diff=c(data_1_subset$evap-data_2_subset$evap),Day = data_1_subset$Day, Texture_ratio=rep(Texture) , Precip=rep(Precip))
+diff$Day <- as.factor(diff$Day)
+diff$Texture <- as.numeric(diff$Texture)
+diff$Precip <- as.numeric(diff$Precip)
+  return(diff)
+}
+#67 
+TDiff_67_22 <- calculate_Understory_T_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 224, Texture= 73.667, Precip=63)
+TDiff_67_22$Well<-rep(67)
+EDiff_67_22 <- calculate_Understory_E_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 224, Texture=73.667, Precip=63)
+EDiff_67_22$Well<-rep(67)
+
+TDiff_67_23 <- calculate_Understory_T_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 224, Texture=73.667, Precip=90)
+TDiff_67_23$Well<-rep(67)
+EDiff_67_23 <- calculate_Understory_E_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 224, Texture=73.667, Precip=90)
+EDiff_67_23$Well<-rep(67)
+#62 
+TDiff_62_22 <- calculate_Understory_T_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 224, Texture=62.333, Precip=50)
+TDiff_62_22$Well<-rep(62)
+EDiff_62_22 <- calculate_Understory_E_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 224, Texture=62.333,Precip=50)
+EDiff_62_22$Well<-rep(62)
+
+TDiff_62_23 <- calculate_Understory_T_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 224, Texture=62.333, Precip=77)
+TDiff_62_23$Well<-rep(62)
+EDiff_62_23 <- calculate_Understory_E_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 224, Texture=62.333, Precip=77)
+EDiff_62_23$Well<-rep(62)
+#59
+TDiff_59_22 <- calculate_Understory_T_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 224, Texture=57.667, Precip=35)
+TDiff_59_22$Well<-rep(59)
+EDiff_59_22 <- calculate_Understory_E_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 224, Texture=57.667, Precip=35)
+EDiff_59_22$Well<-rep(59)
+
+TDiff_59_23 <- calculate_Understory_T_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 224, Texture=57.667, Precip=74)
+TDiff_59_23$Well<-rep(59)
+EDiff_59_23 <- calculate_Understory_E_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 224, Texture=57.667, Precip=74)
+EDiff_59_23$Well<-rep(59)
+
+Evap_diff_22<-rbind(EDiff_67_22,EDiff_62_22,EDiff_59_22)
+Trans_diff_22<-rbind(TDiff_67_22,TDiff_62_22,TDiff_59_22)
+
+Evap_diff_23<-rbind(EDiff_67_23,EDiff_62_23,EDiff_59_23)
+Trans_diff_23<-rbind(TDiff_67_23,TDiff_62_23,TDiff_59_23)
+
+# Perform a two-way ANOVA
+Trans_model <- aov(Transpiration_Diff ~ Texture + Precip+Day, data = Trans_diff_23)
+
+#rowan mess around
+Evap_model <- aov(Evaporation_Diff ~ Texture + Precip+Day, data = Evap_diff_23)
+
+# Display the ANOVA table
+summary(Trans_model)
+summary(Evap_model)
+
+
+```
+
+Data Tables (code outdated but may be helpful later on):
+Difference plots
+```{r}
+calculate_T_difference <- function(Data_1, Data_2, start_Day, end_Day) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","Understory")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","Understory")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+
+  # Calculate differences
+  # Calculate differences
+  diff_1 <- data.frame(Difference_Yes=c(NA, diff(data_1_subset$tran_cm)), Understory=rep("Yes"),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Difference_No=c(NA, diff(data_2_subset$tran_cm)), Understory=rep("No"),Day = data_2_subset$Day)
+  
+result_df<-merge(diff_1,diff_2, by="Day")
+ result_df$Day<-as.factor(result_df$Day)
+  return(result_df)
+}
+
+calculate_E_difference <- function(Data_1, Data_2, start_Day, end_Day) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","evapotr_cm","Understory")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","evapotr_cm","Understory")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+data_1_subset$evap<-data_1_subset$evapotr_cm-data_1_subset$tran_cm
+data_2_subset$evap<-data_2_subset$evapotr_cm-data_2_subset$tran_cm
+
+  # Calculate differences
+  diff_1 <- data.frame(Difference_Yes=c(NA, diff(data_1_subset$evap)), Understory=rep("Yes"),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Difference_No=c(NA, diff(data_2_subset$evap)), Understory=rep("No"),Day = data_2_subset$Day)
+  
+result_df<-merge(diff_1,diff_2, by="Day")
+result_df$Day<-as.factor(result_df$Day)
+  # Create a new dataframe with differences and Day values
+
+  return(result_df)
+}
+
+#67 
+TDiff_67_22 <- calculate_T_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244)
+TDiff_67_22$Well<-rep(67)
+EDiff_67_22 <- calculate_E_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244)
+EDiff_67_22$Well<-rep(67)
+
+TDiff_67_23 <- calculate_T_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244)
+TDiff_67_23$Well<-rep(67)
+EDiff_67_23 <- calculate_E_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244)
+EDiff_67_23$Well<-rep(67)
+#62 
+TDiff_62_22 <- calculate_T_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244)
+TDiff_62_22$Well<-rep(62)
+EDiff_62_22 <- calculate_E_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244)
+EDiff_62_22$Well<-rep(62)
+
+TDiff_62_23 <- calculate_T_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244)
+TDiff_62_23$Well<-rep(62)
+EDiff_62_23 <- calculate_E_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244)
+EDiff_62_23$Well<-rep(62)
+#59
+TDiff_59_22 <- calculate_T_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244)
+TDiff_59_22$Well<-rep(59)
+EDiff_59_22 <- calculate_E_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244)
+EDiff_59_22$Well<-rep(59)
+
+TDiff_59_23 <- calculate_T_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 244)
+TDiff_59_23$Well<-rep(59)
+EDiff_59_23 <- calculate_E_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 244)
+EDiff_59_23$Well<-rep(59)
+
+
+```
+Difference plots with Texture
+```{r}
+calculate_T_difference <- function(Data_1, Data_2, start_Day, end_Day, Texture) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","Understory")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","Understory")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+
+  # Calculate differences
+  # Calculate differences
+  diff_1 <- data.frame(Difference=c(NA, diff(data_1_subset$tran_cm)), Understory=rep("Yes"),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Difference=c(NA, diff(data_2_subset$tran_cm)), Understory=rep("No"),Day = data_2_subset$Day)
+  
+result_df<-rbind(diff_1,diff_2)
+ result_df$Texture<-rep(Texture)
+ result_df$Texture<-as.numeric(result_df$Texture)
+
+  return(result_df)
+}
+
+calculate_E_difference <- function(Data_1, Data_2, start_Day, end_Day, Texture) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","evapotr_cm","Understory")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","evapotr_cm","Understory")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+data_1_subset$evap<-data_1_subset$evapotr_cm-data_1_subset$tran_cm
+data_2_subset$evap<-data_2_subset$evapotr_cm-data_2_subset$tran_cm
+
+  # Calculate differences
+  diff_1 <- data.frame(Difference=c(NA, diff(data_1_subset$evap)), Understory=rep("Yes"),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Difference=c(NA, diff(data_2_subset$evap)), Understory=rep("No"),Day = data_2_subset$Day)
+  
+result_df<-rbind(diff_1,diff_2)
+result_df$Day<-as.factor(result_df$Day)
+  result_df$Texture<-rep(Texture)
+
+# Create a new dataframe with differences and Day values
+
+  return(result_df)
+}
+
+#67 
+TDiff_67_22 <- calculate_T_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244, Texture= 17.667)
+TDiff_67_22$Well<-rep(67)
+EDiff_67_22 <- calculate_E_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244, Texture= 17.667)
+EDiff_67_22$Well<-rep(67)
+
+TDiff_67_23 <- calculate_T_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244, Texture= 17.667)
+TDiff_67_23$Well<-rep(67)
+EDiff_67_23 <- calculate_E_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244, Texture= 17.667)
+EDiff_67_23$Well<-rep(67)
+#62 
+TDiff_62_22 <- calculate_T_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244, Texture= 21.667)
+TDiff_62_22$Well<-rep(62)
+EDiff_62_22 <- calculate_E_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244, Texture= 21.667)
+EDiff_62_22$Well<-rep(62)
+
+TDiff_62_23 <- calculate_T_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244, Texture= 21.667)
+TDiff_62_23$Well<-rep(62)
+EDiff_62_23 <- calculate_E_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244, Texture= 21.667)
+EDiff_62_23$Well<-rep(62)
+#59
+TDiff_59_22 <- calculate_T_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244, Texture= 26.333)
+TDiff_59_22$Well<-rep(59)
+EDiff_59_22 <- calculate_E_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244, Texture= 26.333)
+EDiff_59_22$Well<-rep(59)
+
+TDiff_59_23 <- calculate_T_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 244, Texture= 26.333)
+TDiff_59_23$Well<-rep(59)
+EDiff_59_23 <- calculate_E_difference(Well_59_2023_Understory, Well_59_2023_NU,start_Day = 149, end_Day = 244, Texture= 26.333)
+EDiff_59_23$Well<-rep(59)
+
+Evap_diff_22<-rbind(EDiff_67_22,EDiff_62_22,EDiff_59_22)
+Trans_diff_22<-rbind(TDiff_67_22,TDiff_62_22,TDiff_59_22)
+
+Evap_diff_23<-rbind(EDiff_67_23,EDiff_62_23,EDiff_59_23)
+Trans_diff_23<-rbind(TDiff_67_23,TDiff_62_23,TDiff_59_23)
+
+EDiff_23NOVA<-aov(abs(Difference)~Understory+Texture+Day, data = Evap_diff_23)
+summary(EDiff_23NOVA)
+EDiff_22<-aov(abs(Difference)~Understory+Texture+Day, data = Evap_diff_22)
+summary(EDiff_22)
+TDiff_22NOVA<-aov(abs(Difference)~Understory+Texture+Day, data = Trans_diff_22)
+summary(TDiff_22NOVA)
+TDiff_23NOVA<-aov(abs(Difference)~Understory+Texture+Day, data = Trans_diff_23)
+summary(TDiff_23NOVA)
+
+```
+AET values
+```{r}
+calculate_T_difference <- function(Data_1, Data_2, start_Day, end_Day) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","Understory","evapotr_cm")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","Understory","evapotr_cm")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+
+  # Calculate differences
+  # Calculate differences
+  diff_1 <- data.frame(Proportion_YES=c(data_1_subset$tran_cm),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Proportion_NO=c(data_2_subset$tran_cm),Day = data_2_subset$Day)
+  
+result_df<-merge(diff_1,diff_2,by="Day")
+ 
+result_df$Day<-as.factor(result_df$Day)
+  return(result_df)
+}
+calculate_AET_difference <- function(Data_1, Data_2, start_Day, end_Day) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "evapotr_cm","Understory","evapotr_cm")]
+  data_2_subset <- Data_2[, c("Day", "evapotr_cm","Understory","evapotr_cm")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+
+  # Calculate differences
+  # Calculate differences
+  diff_1 <- data.frame(Proportion_YES=c(data_1_subset$evapotr_cm),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Proportion_NO=c(data_2_subset$evapotr_cm),Day = data_2_subset$Day)
+  
+result_df<-merge(diff_1,diff_2,by="Day")
+ 
+result_df$Day<-as.factor(result_df$Day)
+  return(result_df)
+}
+
+calculate_E_difference <- function(Data_1, Data_2, start_Day, end_Day) {
+  # Extract relevant columns from each dataset
+  data_1_subset <- Data_1[, c("Day", "tran_cm","evapotr_cm","Understory")]
+  data_2_subset <- Data_2[, c("Day", "tran_cm","evapotr_cm","Understory")]
+
+  # Filter data for the specified Days
+  data_1_subset <- data_1_subset[data_1_subset$Day >= start_Day & data_1_subset$Day <= end_Day, , drop = FALSE]
+  data_2_subset <- data_2_subset[data_2_subset$Day >= start_Day & data_2_subset$Day <= end_Day, , drop = FALSE]
+data_1_subset$evap<-data_1_subset$evapotr_cm-data_1_subset$tran_cm
+data_2_subset$evap<-data_2_subset$evapotr_cm-data_2_subset$tran_cm
+
+  # Calculate differences
+  diff_1 <- data.frame(Proportion_Yes=c(data_1_subset$evap), Understory=rep("Yes"),Day = data_1_subset$Day )
+  
+  diff_2 <- data.frame(Proportion_NO=c(data_2_subset$evap),Day = data_2_subset$Day)
+  
+result_df<-merge(diff_1,diff_2, by="Day")
+result_df$Day<-as.factor(result_df$Day)
+  # Create a new dataframe with differences and Day values
+
+  return(result_df)
+}
+
+#67 
+TProp_67_22 <- calculate_T_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244)
+TProp_67_22$Well<-rep(67)
+EProp_67_22 <- calculate_E_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244)
+EProp_67_22$Well<-rep(67)
+
+TProp_67_23 <- calculate_T_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244)
+TProp_67_23$Well<-rep(67)
+EProp_67_23 <- calculate_E_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244)
+EProp_67_23$Well<-rep(67)
+#AET
+AETProp_67_23 <- calculate_AET_difference(Well_67_2023_Understory, Well_67_2023_NU, start_Day = 149, end_Day = 244)
+
+AETProp_67_23$Well<-rep(67)
+AETProp_67_22 <- calculate_AET_difference(Well_67_2022_Understory, Well_67_2022_NU, start_Day = 149, end_Day = 244)
+AETProp_67_22$Well<-rep(67)
+#62 
+TProp_62_22 <- calculate_T_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244)
+TProp_62_22$Well<-rep(62)
+EProp_62_22 <- calculate_E_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244)
+EProp_62_22$Well<-rep(62)
+
+TProp_62_23 <- calculate_T_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244)
+TProp_62_23$Well<-rep(62)
+EProp_62_23 <- calculate_E_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244)
+EProp_62_23$Well<-rep(62)
+#AET
+AETProp_62_23 <- calculate_AET_difference(Well_62_2023_Understory, Well_62_2023_NU, start_Day = 149, end_Day = 244)
+
+AETProp_62_23$Well<-rep(62)
+AETProp_62_22 <- calculate_AET_difference(Well_62_2022_Understory, Well_62_2022_NU, start_Day = 149, end_Day = 244)
+AETProp_62_22$Well<-rep(62)
+#59
+TProp_59_22 <- calculate_T_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244)
+TProp_59_22$Well<-rep(59)
+EProp_59_22 <- calculate_E_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244)
+EProp_59_22$Well<-rep(59)
+
+TProp_59_23 <- calculate_T_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 244)
+TProp_59_23$Well<-rep(59)
+EProp_59_23 <- calculate_E_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 244)
+EProp_59_23$Well<-rep(59)
+
+#AET
+AETProp_59_23 <- calculate_AET_difference(Well_59_2023_Understory, Well_59_2023_NU, start_Day = 149, end_Day = 244)
+
+AETProp_59_23$Well<-rep(59)
+AETProp_59_22 <- calculate_AET_difference(Well_59_2022_Understory, Well_59_2022_NU, start_Day = 149, end_Day = 244)
+AETProp_59_22$Well<-rep(59)
+
+```
+New Bill Visuals SOILWAT2
+```{r}
+SOILWAT_sum_22_WA$Treatment<-rep("Water_Addition")
+SOILWAT_sum_22_WA$Year<-rep(2022)
+SOILWAT_sum_23_WA$Treatment<-rep("Water_Addition")
+SOILWAT_sum_23_WA$Year<-rep(2023)
+SOILWAT_sum_22$Treatment<-rep("No_Water_Addition")
+SOILWAT_sum_22$Year<-rep(2022)
+SOILWAT_sum_23$Treatment<-rep("No_Water_Addition")
+SOILWAT_sum_23$Year<-rep(2023)
+
+Sum_22WA<-rbind(SOILWAT_sum_22_WA,SOILWAT_sum_22)
+
+Sum_22WAE_NW<-rbind(SOILWAT_sum_22,SOILWAT_sum_23)
+Sum_22WAE<-subset(Sum_22WA, Type!="AET" )
+Sum_22WAE$Well<-as.factor(Sum_22WAE$Well)
+
+
+Sum_23WA<-rbind(SOILWAT_sum_23_WA,SOILWAT_sum_23)
+Sum_23WAE<-subset(Sum_23WA, Type!="AET" )
+Sum_23WAE$Well<-as.factor(Sum_23WAE$Well)
+
+Sum_WA<-rbind(SOILWAT_sum_22_WA,SOILWAT_sum_22,SOILWAT_sum_23_WA,SOILWAT_sum_23)
+Sum_WAE<-subset(Sum_WA,  Type != "Bare_soil_evap" & Type != "AET" )
+Sum_WAE$Well<-as.factor(Sum_WAE$Well)
+
+Sum_22WAE_NW<-subset(Sum_WAE, Treatment=="No_Water_Addition")
+
+
+Sum_22WAE_NW$Understory <- fct_recode(Sum_22WAE_NW$Understory, 
+                                      "Control" = "Yes",
+                                      "Removal" = "No")
+
+Sum_22WAE_NW$Understory<- factor(Sum_22WAE_NW$Understory, levels = c("Control", "Removal"))
+
+SOILWAT_sum_22_vis <- ggplot(Sum_22WAE_NW, aes(x = Well, y = mm*10, fill = Understory, pattern = Understory)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black", size = 0.5) +
+  scale_fill_manual(values = colorRampPalette(c("white","#999999"))(2)) +
+  scale_pattern_manual(values = c(`Removal` = "stripe", `Control` = "none")) +
+  geom_bar_pattern(stat = "identity", position = position_dodge(preserve = "single"),
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025,
+                   pattern_key_scale_factor = 0.6) +
+  theme_minimal() +
+
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 16, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 16),
+        axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        plot.title = element_text(size = 18),
+        plot.subtitle = element_text(size = 16),
+        strip.text = element_text(size = 14),
+        legend.position = "bottom",
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  labs(x = "Well ID", y = NULL,
+       title = "SOILWAT2 evaporation and transpiration estimates for plots with and without understory 2022 and 2023",fill = "Treatment") +
+   facet_grid(Type ~ Year, labeller = labeller(c("Evaporation" = "Cumulative Evaporation (mm)", "Transpiration" = "Cumulative Transpiration (mm)"),
+                                              Year = c("2022" = "2022", "2023" = "2023")))+ 
+       
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                 title = "Treatment"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                              title = NULL)) +
+  scale_y_continuous(breaks = seq(0, max(Comparative$mm, na.rm = TRUE), by = 10))
+
+
+
+SOILWAT_sum_22_vis
+
+Sum_WAE
+
+SOILWAT_sum_22_vis<-ggplot(Sum_WAE, aes(x = Well, y=mm*10, fill = Treatment, pattern=Understory))+
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black", size = 0.5) +
+  
+  scale_fill_manual(values = colorRampPalette(c("white","#999999"))(2))+
+  scale_pattern_manual(values = c(`No` = "stripe", `Yes` = "none")) +
+  geom_bar_pattern(stat = "identity",position = position_dodge(preserve = "single"),
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025,
+                   pattern_key_scale_factor = 0.6) + 
+ theme_minimal() +
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 12, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size = 14),
+        plot.subtitle = element_text(size = 12),
+        strip.text = element_text(size = 10),
+        legend.position = "right",
+        legend.title = element_text(size = 12), # Modify legend title size here
+        legend.text = element_text(size = 10),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  
+  labs(x = "Well", y = "Evaporation (mm)", 
+       title = "SOILWAT2 evaporation estimates of plots with and without understory, water addition plots and non water addtion plots 2022") + 
+       
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                 title = "Understory Species Present?"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                              title = "Water Treatment"))+facet_wrap(~Year+ Type)
+
+SOILWAT_sum_22_vis
+
+
+SOILWAT_sum_23_vis<-ggplot(Sum_23WAE, aes(x = Well, y=mm*10, fill = Treatment, pattern=Understory))+
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black", size = 0.5) +
+  
+  scale_fill_manual(values = colorRampPalette(c("#999999","white"))(2))+
+  scale_pattern_manual(values = c(`No` = "stripe", `Yes` = "none")) +
+  geom_bar_pattern(stat = "identity",position = position_dodge(preserve = "single"),
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025,
+                   pattern_key_scale_factor = 0.6) + 
+
+  theme_minimal() +
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 12, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size = 14),
+        plot.subtitle = element_text(size = 12),
+        strip.text = element_text(size = 10),
+        legend.position = "right",
+        legend.title = element_text(size = 12), # Modify legend title size here
+        legend.text = element_text(size = 10),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  
+  labs(x = "Well", y = "Evaporation (mm)", 
+       title = "SOILWAT2 evaporation estimates of plots with and without understory, water addition plots and non water addtion plots 2022") + 
+       
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                 title = "Understory Species Present?"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                              title = "Water Treatment"))+facet_wrap(~Year+ Type)
+
+SOILWAT_sum_23_vis
+
+
+
+
+SOILWAT_Evap_vis<-ggplot(Sum_WAE, aes(x = Well, y=mm*10, fill = Understory, pattern=Understory))+
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black", size = 0.5) +
+  
+  scale_fill_manual(values = colorRampPalette(c("lightblue","white"))(2))+
+  scale_pattern_manual(values = c(`No` = "stripe", `Yes` = "none")) +
+  geom_bar_pattern(stat = "identity",position = position_dodge(preserve = "single"),
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025,
+                   pattern_key_scale_factor = 0.6) + 
+
+  theme_minimal() +
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 12, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size = 14),
+        plot.subtitle = element_text(size = 12),
+        strip.text = element_text(size = 10),
+        legend.position = "right",
+        legend.title = element_text(size = 12), # Modify legend title size here
+        legend.text = element_text(size = 10),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  
+  labs(x = "Well", y = "Evaporation (mm)", 
+       title = "SOILWAT2 evaporation estimates of plots with and without understory, water addition plots and no water addtion plots") + 
+       
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                 title = "Understory Species Present?"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                              title = "Water Treatment"))+facet_wrap(~Year+ Type)
+SOILWAT_Evap_vis
+write.csv(Sum_WAE, "C:/Users/walnu/Desktop/SOILWAT2_Water_Addition_Sims.csv")
+ggplot2::ggsave("C:/Users/walnu/Desktop/Trans_Evap2.png", SOILWAT_sum_22_vis, width = 8, height = 8)
+ggplot2::ggsave("E:/Evap_2023_Water_Add.png", SOILWAT_sum_23_vis, width = 12, height = 8)
+ggplot2::ggsave("E:/Evap_Water_Add.png", SOILWAT_Evap_vis, width = 14, height = 10)
+```
+New Bill Visuals Field Data
+```{r}
+Field_22
+Field_23
+Field<-rbind(Field_22,Field_23)
+Field_22_WA
+Field_23_WA
+
+
+Field_22_WA$Treatment<-rep("Water_Addition")
+Field_22_WA$Year<-rep(2022)
+Field_23_WA$Treatment<-rep("Water_Addition")
+Field_23_WA$Year<-rep(2023)
+Field_22$Treatment<-rep("No_Water_Addition")
+Field_22$Year<-rep(2022)
+Field_23$Treatment<-rep("No_Water_Addition")
+Field_23$Year<-rep(2023)
+
+Field_WA<-rbind(Field_22_WA,Field_22,Field_23_WA,Field_23)
+
+Field_WA$Well<-as.factor(Field_WA$Well)
+Field_sum_22_vis<-ggplot(Field_WA, aes(x = Well, y=mm, fill = Treatment, pattern=Understory))+
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black", size = 0.5) +
+  
+  scale_fill_manual(values = colorRampPalette(c("#999999","white"))(2))+
+  scale_pattern_manual(values = c(`No` = "stripe", `Yes` = "none")) +
+  geom_bar_pattern(stat = "identity",position = position_dodge(preserve = "single"),
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025,
+                   pattern_key_scale_factor = 0.6) + 
+ theme_minimal() +
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 12, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(size = 14),
+        plot.subtitle = element_text(size = 12),
+        strip.text = element_text(size = 10),
+        legend.position = "right",
+        legend.title = element_text(size = 12), # Modify legend title size here
+        legend.text = element_text(size = 10),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  
+  labs(x = "Well", y = "AET (mm)", 
+       title = "Cumulative AET (mm) calculated from sensor data from plots with and without understory, water addition plots and non water addtion plots, 2022 and 2023") + 
+       
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                 title = "Understory Species Present?"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                              title = "Water Treatment"))+facet_wrap(~Year)
+
+Field_sum_22_vis
+write.csv(Field_WA, "C:/Users/walnu/Desktop/Field_Water_Addition_Data.csv")
+ggplot2::ggsave("E:/AET_Water_Addition.png", Field_sum_22_vis, width = 14, height = 8)
+
+
+
+##Making plot comparing field and soilwat data
+Field$Source<-rep("Field")
+SOILWAT<-rbind(SOILWAT_sum_22, SOILWAT_sum_23)
+SOILWAT<-subset(SOILWAT, Type=="AET" )
+SOILWAT$mm<-SOILWAT$mm*10
+Comparative<-rbind(Field,SOILWAT)
+
+Comparative$Well<-as.factor(Comparative$Well)
+
+Sum_22WAE_NW<-subset(Sum_WAE, Treatment=="No_Water_Addition")
+
+
+Comparative$Understory <- fct_recode(Comparative$Understory, 
+                                      "Control" = "Yes",
+                                      "Removal" = "No")
+Comparative$Understory<- factor(Comparative$Understory, levels = c("Control", "Removal"))
+
+Comparative
+Field_comparison <- ggplot(Comparative, aes(x = Well, y = mm, fill = Source, pattern = Understory)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black", size = 0.5) +
+  scale_fill_manual(values = colorRampPalette(c("white", "#999999"))(2)) +
+  scale_pattern_manual(values = c(`Removal` = "stripe", `Control` = "none")) +
+  geom_bar_pattern(stat = "identity", position = position_dodge(preserve = "single"),
+                   color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.025,
+                   pattern_key_scale_factor = 0.6) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "black"),
+        panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(color = "black"),
+        axis.title.x = element_text(size = 16, margin = margin(t = 20)),
+        axis.title.y = element_text(size = 16),
+        axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14),
+        plot.title = element_text(size = 16),
+        plot.subtitle = element_text(size = 14),
+        strip.text = element_text(size = 14),
+        legend.position = "bottom",
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12),
+        panel.background = element_rect(fill = "white"),
+        plot.background = element_rect(fill = "white")) +
+  labs(x = "Well ID", y = "Cumulative AET (mm)",
+       title = NULL) +
+  guides(pattern = guide_legend(override.aes = list(fill = "white"),
+                                title = "Treatment"),
+         fill = guide_legend(override.aes = list(pattern = "none"),
+                             title = "Output Source")) +
+  facet_wrap(~Year) +
+  scale_y_continuous(breaks = seq(0, max(Comparative$mm, na.rm = TRUE), by = 10))  # Adjust y-axis increments
+
+Field_comparison
+
+ggplot2::ggsave("C:/Users/walnu/Desktop/Field_SOILWAT2_Comparison.png", Field_comparison, width = 10, height = 6)
+
+```
+
+Soilwat2 Biomass runs
+```{r}
+all_results <- list()
+calculate_AET_difference <- function(df1, start_Day, end_Day) {
+  # Step 1: Filter rows for the specified time frame in both data frames
+  df1_filtered <- df1[df1$Day >= start_Day & df1$Day <= end_Day, ]
+  
+  # Step 2: Calculate the total AET for each data frame
+  total_tran_df1 <- data.frame(
+    mm = sum(df1_filtered$tran_cm),
+    Type = "Transpiration",
+    Biomass=  df$Biomass[1],
+    Grass_cover=df$Grass[1])
+
+  total_evap_df1 <- data.frame(
+    mm = sum(df1_filtered$evapotr_cm) - sum(df1_filtered$tran_cm),
+    Type = "Evaporation",
+    Biomass=df$Biomass[1],
+     Grass_cover=df$Grass[1]
+  )
+
+ total_AET_df1 <- data.frame(
+    mm = sum(df1_filtered$evapotr_cm),
+    Type = "AET",
+    Biomass=df$Biomass[1],
+     Grass_cover=df$Grass[1]
+    )
+
+  # Step 3: Combine the calculated data frames into the 'results' dataframe
+  results <- rbind(total_tran_df1, total_evap_df1, total_AET_df1 )
+
+  # Reset row names in the result dataframe
+  rownames(results) <- NULL
+
+  return(results)
+}
+
+run_sw_exec <- function(sand_frac, clay_frac, gravel_content, bulkDensity_g.cm.3, wdata, understory_biomass, Shrub, Grass, Bareground, Forb1, Forb2, Succulent) {
+  
+sw_in3 <- sw_inputDataFromFiles(dir = path_demo, files.in = "files.in")
+  # Note: `estimate_PotNatVeg_composition()` does not estimate fractional cover
+  # of trees, bare-ground, etc. and sets those to zero or any other user
+  # defined value
+
+clim <- rSOILWAT2::calc_SiteClimate(weatherList = wdata, do_C4vars = TRUE)
+#Generate data off Weekmet data
+veg_cover <- rSOILWAT2::estimate_PotNatVeg_composition(
+MAP_mm = 10 * clim[["MAP_cm"]],
+MAT_C = clim[["MAT_C"]],
+mean_monthly_ppt_mm = 10 * clim[["meanMonthlyPPTcm"]],
+mean_monthly_Temp_C = clim[["meanMonthlyTempC"]],
+dailyC4vars = clim[["dailyC4vars"]]
+)
+# Ensure the sum of all components in veg_cover is equal to 1
+#Here I'm manually changing calculated starting veg values for later calculations.  3 different veg_cover outputs, were low shrub cover (10%), moderate shrub cover (40%), and high shrub cover (60%). the values of Rel_Abundance_L0 and Rel_Abundance_L1 need to add up to 1. low shrub cover( grass 43%, forbs 23%), moderate shrub cover (grass 26%, forbs 16%), and high shrub cover (grass 15%, forbs 12%) (Pennington et al., 2019).   grasses is 20%.
+
+veg_cover[["Rel_Abundance_L1"]][["SW_TREES"]]<-0
+veg_cover[["Rel_Abundance_L1"]][["SW_SHRUB"]]<-Shrub
+veg_cover[["Rel_Abundance_L1"]][["SW_FORBS"]]<-Forb1
+veg_cover[["Rel_Abundance_L1"]][["SW_GRASS"]]<-Grass
+veg_cover[["Rel_Abundance_L1"]][["SW_BAREGROUND"]]<-Bareground
+
+
+veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]]<-Grass
+veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["Shrubs"]]<-Shrub
+veg_cover[["Rel_Abundance_L0"]][["Forbs"]]<-Forb2
+veg_cover[["Rel_Abundance_L0"]][["Trees"]]<-0
+veg_cover[["Rel_Abundance_L0"]][["BareGround"]]<-Bareground
+veg_cover[["Rel_Abundance_L0"]][["Succulents"]]<-Succulent
+veg_cover[["Grasses"]][["Grasses_C3"]]<-1
+
+
+
+ids <- sapply(
+    X = names(rSOILWAT2::swProd_Composition(sw_in3)),
+ FUN = function(x) {
+    grep(
+      pattern = substr(x, 1, 4),
+      x = names(veg_cover[["Rel_Abundance_L1"]]),
+     ignore.case = TRUE
+    )
+  }
+)
+  # Assign fractional cover values to rSOILWAT2 input object
+rSOILWAT2::swProd_Composition(sw_in3) <- veg_cover[["Rel_Abundance_L1"]][ids]
+    ### Biomass amount and phenology (for shrubs and grasses)
+  # Reference biomass values from Bradford et al. 2014 are used
+  # Mean monthly reference temperature corresponding to default phenology values
+  # for the median across 898 big sagebrush sites are used
+  veg_biom_mod_U <- rSOILWAT2::estimate_PotNatVeg_biomass(
+    target_temp = clim[["meanMonthlyTempC"]],
+    target_MAP_mm = 10 * clim[["MAP_cm"]],
+    do_adjust_phenology = TRUE,
+    do_adjust_biomass = TRUE,
+    fgrass_c3c4ann = veg_cover[["Grasses"]],
+  )
+  
+a<-as.data.frame(veg_biom_mod_U$grass)
+a$Biomass<-rep(understory_biomass)
+a<-as.matrix(a)
+veg_biom_mod_U$grass<-a
+  # Assign monthly biomass values to rSOILWAT2 input object
+  # Note: monthly biomass values of forbs, trees, etc. need to be estimated
+  v1 <- c("Litter", "Biomass", "Perc.Live")
+  v2 <- c("Litter", "Biomass", "Live_pct")
+  rSOILWAT2::swProd_MonProd_grass(sw_in3)[, v2] <- veg_biom_mod_U[["grass"]][, v1]
+  rSOILWAT2::swProd_MonProd_shrub(sw_in3)[, v2] <- veg_biom_mod_U[["shrub"]][, v1]
+  
+  ### Rooting profiles of vegetation types
+
+  # Select rooting profile types
+  # Set those to "FILL" where cover == 0 (because of transpiration regions)
+  trco_type_by_veg <- list(
+    grass_C3 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C3"]] > 0) {
+      "SchenkJackson2003_PCdry_grasses"
+    } else {
+      "FILL"
+    },
+    grass_C4 = if (veg_cover[["Rel_Abundance_L0"]][["Grasses_C4"]] > 0) {
+      "SchenkJackson2003_PCdry_grasses"
+    } else {
+      "FILL"
+    },
+    grass_annuals = if (
+      veg_cover[["Rel_Abundance_L0"]][["Grasses_Annuals"]] > 0
+    ) {
+      "Jacksonetal1996_crops"
+    } else {
+      "FILL"
+    },
+    shrub = if (veg_cover[["Rel_Abundance_L0"]][["Shrubs"]] > 0) {
+      "SchenkJackson2003_PCdry_shrubs"
+    } else {
+      "FILL"
+    },
+    forb = if (veg_cover[["Rel_Abundance_L0"]][["Forbs"]] > 0) {
+      "SchenkJackson2003_PCdry_forbs"
+    } else {
+      "FILL"
+    },
+    tree = if (veg_cover[["Rel_Abundance_L0"]][["Trees"]] > 0) {
+      "Bradfordetal2014_LodgepolePine"
+    } else {
+      "FILL"
+    }
+  )
+
+  # Create a soil_fixed data frame with the specified input values
+ soil_fixed <- data.frame(
+    depth_cm = c(5, 10, 20, 30, 40,60,80,100),
+    bulkDensity_g.cm.3 = bulkDensity_g.cm.3,
+    gravel_content = gravel_content,
+    EvapBareSoil_frac = c(0.9182,0.0818,0.000,0.000,0.000,0.000,0.000,0.000),
+    transpGrass_frac = c(0.1978543,0.1651257,0.2528258,0.3841942,0.3841942,0.2528258,0.3841942,0.3841942),
+    transpShrub_frac = c(0.1585857,0.1414536,0.2387138,0.4612469,0.4612469,0.2387138,0.4612469,0.4612469),
+    transpTree_frac =  c(0.1,0.1,0.2,0.6,0.4,0.2,0.6,0.4),
+    transpForb_frac = c(0.1978543,0.1651257,0.2528258,0.3841942,0.3841942,0.2528258,0.3841942,0.3841942),
+    sand_frac = sand_frac,
+    clay_frac = clay_frac,
+    impermeability_frac = c(0,0,0,0,0,0,0,0),
+    soilTemp_c = c(-0.9803060,-0.9606121,-0.9212242,-0.8030605, -0.8030605,-0.9212242,-0.8030605, -0.8030605)
+  )
+soil_new <- data.frame(rSOILWAT2::swSoils_Layers(sw_in3)[0, ])
+  
+soil_new[seq_len(nrow(soil_fixed)), ] <- soil_fixed
+
+  veg_roots <- rSOILWAT2::estimate_PotNatVeg_roots(
+    layers_depth = soil_new[, "depth_cm"],
+    trco_type_by_veg = trco_type_by_veg,
+    fgrass_c3c4ann = veg_cover[["Grasses"]]
+  )
+
+  # Add rooting profile to soil
+  v1 <- c("Grass", "Shrub", "Tree", "Forb")
+  v2 <- paste0("transp", v1, "_frac")
+  soil_new[, v2] <- veg_roots[, v1]
+
+  # Create a new sw_in object with soil_new
+  rSOILWAT2::swSoils_Layers(sw_in3) <- data.matrix(soil_new)
+
+  # Run sw_in through rSOILWAT2::sw_exec() to create sw_out
+  sw_out <- rSOILWAT2::sw_exec(inputData = sw_in3, weatherList = wdata)
+  
+  return(sw_out)
+}
+# Define the parameter values
+sand_frac = c(.52976,.7062187562,.6319936013,.6862227554,.6862227554,.6862227554,.6862227554,.6862227554) 
+clay_frac = c(.1488,.1516496701,.225874825,.1923615277,.1923615277,.1923615277,.1923615277,.1923615277)
+gravel_content = c(0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00)
+bulkDensity_g.cm.3= c(1.210033104,1.661166285,1.811204482,1.666004584,1.666004584,1.666004584,1.666004584,1.666004584)
+wdata <- wdata6
+understory <- TRUE
+understory_biomass <- 100
+Shrub <- 0.3
+Grass <- 0.25
+Bareground <- 0.35
+Forb1 <- 0.1
+Forb2 <- 0.1
+Succulent <- 0
+
+# Initialize a list to store results
+all_results <- list()
+  biomass_results <- list()
+# Loop through Biomass values
+for (biomass in seq(0, 300, by = 20)) {
+  # Initialize a list to store results for each biomass value
+
+  
+  # Loop through Grass values from 0 to 0.4 by 0.01
+  for (grass in seq(0, 0.56, by = 0.04)) {
+    # Calculate Bareground value to ensure the sum of Grass and Bareground equals 0.6
+    bareground <- 0.6 - grass
+    
+    # Run the model
+    result <- run_sw_exec(
+      sand_frac = sand_frac,
+      clay_frac = clay_frac,
+      gravel_content = gravel_content,
+      bulkDensity_g.cm.3 = bulkDensity_g.cm.3,
+      wdata = wdata,
+      understory_biomass = biomass,
+      Shrub = Shrub,
+      Grass = grass,
+      Bareground = bareground,
+      Forb1 = Forb1,
+      Forb2 = Forb2,
+      Succulent = Succulent
+    )
+    
+    # Process additional data
+    output_AET <- as.data.frame(result@AET@Day)
+    output_AET <- subset(output_AET, Year == 2010)
+    
+    # Add columns for Biomass, Grass, and Bareground values
+    output_AET$Biomass <- biomass
+    output_AET$Grass <- grass
+    output_AET$Bareground <- bareground
+    
+    # Bin Grass values into four categories
+    output_AET$Grass_bin <- cut(output_AET$Grass, breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+    
+    # Append the result to biomass_results list
+    biomass_results[[length(biomass_results) + 1]] <- output_AET
+  }
+  
+  # Combine results for all grass values into a single dataframe
+  biomass_results_combined <- do.call(rbind, biomass_results)
+  
+  # Append the combined result to all_results list
+  all_results[[length(all_results) + 1]] <- biomass_results_combined
+}
+
+  # Group by unique combinations of Biomass, Grass, and Bareground columns
+grouped_results <- soiwat2loop %>%
+  group_split(Biomass, Grass, Bareground)
+soiwat2loop <- do.call(rbind, all_results)
+# Initialize a list to store the results
+all_Biomass_sims <- list()
+
+
+
+# Iterate over each group of grouped_results
+for (df in grouped_results) {
+
+  # Apply the calculate_AET_difference function to each subgroup
+  Biomass_sims <- calculate_AET_difference(df, start_Day = 149, end_Day = 244)
+  
+  # Store the result in the list
+  all_Biomass_sims[[length(all_Biomass_sims) + 1]] <- Biomass_sims
+}
+
+# Combine results for all biomass values into a single dataframe
+library(openxlsx)
+write.csv(Nitrogen_gm_240, "C:/Users/walnu/Desktop/Chapter2.csv")
+
+write.table(soiwat2loop, file = "C:/Users/walnu/Desktop/soiwat2biomass.csv", sep = "\t", row.names = FALSE, col.names = TRUE,quote = FALSE)
+
+# Combine all results into one dataframe
+combined_Biomass_sims <- do.call(rbind, all_Biomass_sims)
+combined_Biomass_sims$mm<-combined_Biomass_sims$mm*10
+library(data.table)
+breaks <- c(0, 0.1, 0.2, 0.3, 0.4, .5, .6)
+combined_Biomass_sims<-fread(file.path("C:/Users/walnu/Desktop/soiwat2biomass_calc2.csv"))
+
+# Create bin column
+combined_Biomass_sims$bin <- cut(combined_Biomass_sims$Grass_cover, breaks = breaks,
+                                 labels = c("0.01-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4","0.4-0.5","0.5-0.6" ))
+# Calculate mean and confidence intervals
+summary_data <- combined_Biomass_sims %>%
+  dplyr::group_by(Type, bin, Biomass) %>%
+  dplyr::summarise(mean_mm = mean(mm),
+                   sd_mm = sd(mm),
+                   n = n()) %>%
+  dplyr::mutate(se_mm = sd_mm / sqrt(n),
+                ci_upper = mean_mm + 1.96 * se_mm,
+                ci_lower = mean_mm - 1.96 * se_mm)
+
+
+# Create the ggplot with geom_line for mean and geom_ribbon for confidence intervals
+W2023 <- ggplot(combined_Biomass_sims, aes(x = Biomass, y = mm)) +
+  geom_point(aes(color = bin)) +
+  #geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper, fill = bin), alpha = 0.2) +
+  labs(y = "(mm)", x = "Biomass (g/m^2)", title = "Cumulative AET, Evaporation, and Transpiration from 5/29-8/7 with different simulated biomass, 2023 weather", color= "Proportion of cover",fill= "Proportion of cover") +
+  theme(plot.background = element_rect(fill = "white"),
+        axis.title.x = element_text(size = axis_title_size, margin = margin(t = 20)),
+        axis.title.y = element_text(size = axis_title_size),
+        axis.text.x = element_text(size = axis_text_size),
+        axis.text.y = element_text(size = axis_text_size),
+        legend.position = "right",
+        plot.title = element_text(size = main_title_size),
+        plot.subtitle = element_text(size = subtitle_size),
+        strip.text = element_text(size = facet_label_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.title = element_text(size = legend_title_size)) +
+  theme_minimal() +
+  scale_color_manual(values = c("darkgreen", "steelblue", "darkorange", "darkred", "blue", "red"),
+                     labels = c("0.01-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4","0.4-0.5","0.5-0.6"))  +
+  facet_wrap(~Type)
+
+W2023
+
+
+
+ggplot2::ggsave("C:/Users/walnu/Desktop/Biomass_sim_2023.png", W2023, width = 16, height = 12)
+```
